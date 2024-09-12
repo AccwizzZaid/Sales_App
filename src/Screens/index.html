@@ -1,0 +1,257 @@
+<html>
+
+<head>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            overflow-y: scroll;
+            /* Allows scrolling */
+            width: 100%;
+        }
+
+        .service-table{
+            width: 100%;
+        }
+
+        tr,td,th {
+            border: 2px solid black;
+            padding: 2px;
+        }
+
+        .pages {
+            width: 80vw;
+            /* Approximation of A4 width */
+            height: 100vh;
+            /* Approximation of A4 height */
+            max-width: 210mm;
+            /* A4 width in mm */
+            max-height: 297mm;
+            /* A4 height in mm */
+            box-sizing: border-box;
+            /* Includes padding and border in the element's total width and height */
+            border: 1px solid #000;
+            /* Border for visual reference */
+            margin: auto;
+            /* Center the element horizontally and vertically */
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+            margin-top: 2vh;
+        }
+
+        .pagecontainer {
+            width: 90%;
+            background-color: #fff;
+            /* border: 2px solid black; */
+        }
+
+        .pageheader {
+            width: 100%;
+            height: 7vh;
+            background-color: #fff;
+            border-bottom: 5px solid #730A11;
+            box-sizing: border-box;
+        }
+
+        .topheader {
+            width: 100%;
+            height: 3vh;
+            border-bottom: 2px solid pink;
+        }
+
+        .bottomheader {
+            width: 100%;
+            height: 4vh;
+
+        }
+
+        .companyname {
+            padding-top: 1vh;
+            margin-bottom: 1vh;
+            font-size: 1.5rem;
+            text-align: center;
+            color: red;
+            font-weight: bold;
+        }
+
+        .companyaddress {
+            font-weight: bold;
+            text-align: center;
+            padding-top: 0.5vh;
+            font-size: 0.9rem;
+        }
+
+        .email {
+            text-align: center;
+            font-size: 0.9rem;
+            margin-bottom: 0.5vh;
+        }
+
+        .pagebody {
+            padding: 3%;
+        }
+    </style>
+    <script>
+        function insertCurrentDate() {
+            const currentDate = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            const formattedDate = currentDate.toLocaleDateString(undefined, options);
+
+            document.querySelectorAll('.current-date').forEach(el => {
+                el.textContent = formattedDate;
+            });
+        }
+
+        window.onload = insertCurrentDate;
+    </script>
+</head>
+
+<body>
+    <div class="pages">
+        <div class="pagecontainer">
+            <div class="pageheader">
+                <div class="topheader">
+                    <p class="companyname">ACCWIZZ BUSINESS SOLUTIONS PRIVATE LIMITED</p>
+
+                </div>
+                <div class="bottomheader">
+                    <p class="companyaddress">
+                        A-204, Bhaskar Commercial Complex, Mayekar Wadi, Virat Nagar, Near Platform no. 1 Virar west –
+                        401303
+                    </p>
+                    <p class="email">Email- <a href="info@accwizz.com">info@accwizz.com</a></p>
+                </div>
+            </div>
+            <div class="pagebody">
+                <p style="font-size: 2rem; text-align: center; font-weight: bold;">Quotation</p>
+                <p style="font-size: 1.2rem; text-align: end; font-weight: bold;">Date - <span
+                        class="current-date"></span></p><br>
+                <p>
+                    To,<br>
+                    Management committee,<br>
+                    Viva Raj Maitry CHSL,<br>
+                    Virar(W).
+                </p><br>
+                <p style="text-indent: 2em;">Subject:- Quotation for Accounting & Facility Management Services of your
+                    Society premises.</p><br>
+
+                <p>Respected Chairman/ Secretary/ Treasurer</p>
+                <p style=" text-align: justify;">
+                    &nbsp;&nbsp;&nbsp;&nbsp;Thank you for considering Accwizz Business Solutions Private Limited for
+                    your
+                    accounting management and society management needs. We are pleased to provide you with a
+                    quotation for the services we offer, tailored to meet the requirements of your society. This letter
+                    outlines the terms and conditions of the services we will provide to ensure the efficient and
+                    effective management of your society premises.
+                </p><br><br>
+                <u>
+                    <p style="font-weight: bold;">Details of Assignment</p>
+                </u><br>
+                <ul style="list-style-type: decimal; padding-left: 1.5em;">
+                    <li>
+                        <textarea
+                            style="width: 100%; box-sizing: border-box; overflow-y: auto; height: auto; min-height: 2em; resize: vertical; font-size: 0.5rem;"
+                            rows="3" wrap="hard">
+            Lorem ipsum dolor sit amet consectetur adipisicing elit. Esse, quo modi. Voluptatibus aliquid animi quisquam commodi. Magnam, voluptatum officia quod aspernatur nemo autem libero, eaque amet, quas magni ad perferendis!
+        </textarea>
+                    </li><br>
+                    <li>
+                        <textarea
+                            style="width: 100%; box-sizing: border-box; overflow-y: auto; height: auto; min-height: 2em; resize: vertical; font-size: 0.5rem;"
+                            rows="3" wrap="hard">
+            Lorem ipsum dolor sit amet consectetur adipisicing elit. Esse, quo modi. Voluptatibus aliquid animi quisquam commodi. Magnam, voluptatum officia quod aspernatur nemo autem libero, eaque amet, quas magni ad perferendis!
+        </textarea>
+                    </li><br>
+                    <li>
+                        <textarea
+                            style="width: 100%; box-sizing: border-box; overflow-y: auto; height: auto; min-height: 2em; resize: vertical; font-size: 0.5rem;"
+                            rows="6" wrap="hard">
+            Lorem ipsum dolor sit amet consectetur adipisicing elit. Esse, quo modi. Voluptatibus aliquid animi quisquam commodi. Magnam, voluptatum officia quod aspernatur nemo autem libero, eaque amet, quas magni ad perferendis!
+        </textarea>
+                    </li><br><br>
+
+                <u><p style="font-weight: bold;">Fees and Billings </p></u><br>
+
+                <li>We estimate that our fee for captioned services, <b>(without any applicable tax)</b> 
+                </li>
+
+
+                <table class="service-table">
+                    <tr>
+                        <th>Type</th>
+                        <th>Description</th>
+                        <th>Cost(in Rupees)</th>
+                        <th>Total</th>
+                    </tr>
+                    <tr>
+                        <tr></tr>
+                    </tr>
+                    <tr>
+                        <tr></tr>
+                    </tr>
+                    <tr>
+                        <tr></tr>
+                    </tr>
+                </table>
+
+
+                </ul>
+
+
+
+            </div>
+        </div>
+    </div>
+    <div class="pages">
+        <div class="pagecontainer">
+            <div class="pageheader">
+                <div class="topheader">
+                    <p class="companyname">ACCWIZZ BUSINESS SOLUTIONS PRIVATE LIMITED</p>
+
+                </div>
+                <div class="bottomheader">
+                    <p class="companyaddress">
+                        A-204, Bhaskar Commercial Complex, Mayekar Wadi, Virat Nagar, Near Platform no. 1 Virar west –
+                        401303
+                    </p>
+                    <p class="email">Email- <a href="info@accwizz.com">info@accwizz.com</a></p>
+                </div>
+            </div>
+
+        </div>
+        <div class="pagebody">
+
+        </div>
+    </div>
+    </div>
+    <div class="pages">
+        <div class="pagecontainer">
+            <div class="pageheader">
+                <div class="topheader">
+                    <p class="companyname">ACCWIZZ BUSINESS SOLUTIONS PRIVATE LIMITED</p>
+
+                </div>
+                <div class="bottomheader">
+                    <p class="companyaddress">
+                        A-204, Bhaskar Commercial Complex, Mayekar Wadi, Virat Nagar, Near Platform no. 1 Virar west –
+                        401303
+                    </p>
+                    <p class="email">Email- <a href="info@accwizz.com">info@accwizz.com</a></p>
+                </div>
+            </div>
+
+        </div>
+        <div class="pagebody">
+        </div>
+    </div>
+    </div>
+</body>
+
+</html>

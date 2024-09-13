@@ -44,9 +44,9 @@ type formstructure = {
 }
 
 type servicelist = {
-    servicename : string,
-    serviceid : number,
-    rate : number | null
+    servicename: string,
+    serviceid: number,
+    rate: number | null
 
 }
 
@@ -87,9 +87,9 @@ const Quotation = () => {
         },
     })
 
-    const navigation : any  = useNavigation();
+    const navigation: any = useNavigation();
 
-    const [servicelist, setServicelist] = useState <[servicelist] | null>(null);
+    const [servicelist, setServicelist] = useState<[servicelist] | null>(null);
     const [imageUri, setImageUri] = useState<string | null>(null);
     // const [selectedservices, setSelectedservices] = useState<Array<object>>([])
 
@@ -103,13 +103,17 @@ const Quotation = () => {
 
     const [annualaudit, setAnnualaudit] = useState<boolean>(false);
 
-    const [checkedlist, setCheckedlist] = useState<Array<Number>>([]);
+    const [servicecheckedlist, setServiceCheckedlist] = useState<Array<Number>>([]);
+
+    const [paragraphscheckedlist, setParagraphsCheckedlist] = useState<Array<Number>>([]);
 
     const [socpic, setSocpic] = useState<ArrayBuffer | string | null>(null);
 
-    const [ preview , setPreview ] = useState<boolean>(false);
+    const [preview, setPreview] = useState<boolean>(false);
 
-    const [ previewdata , setPreviewdata ] = useState<object>({});
+    const [previewdata, setPreviewdata] = useState<object>({});
+
+    const [paragraphslist, setParagraphslist] = useState<[object]>({});
 
 
     const GetServices = async (): Promise<void> => {
@@ -121,13 +125,33 @@ const Quotation = () => {
         }
     };
 
+    const GetParagraphs = async (): Promise<void> => {
+        try {
+            const response = await axios.get(`${apiurl}getparagraphs`);
+            const paragraphdata = response.data.payload;
+            setParagraphslist(paragraphdata);
+            
+            const serialnumbers = paragraphdata.map((item) => {
+                return item.sno
+            }) 
+
+            console.log(serialnumbers , "This");
+            
+            setParagraphsCheckedlist(serialnumbers);
+
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
 
     useEffect(() => {
         GetServices();
+        GetParagraphs();
     }, [])
 
-    const handleCheckboxChange = (serviceid: number) => {
-        setCheckedlist((prevCheckedlist) => {
+    const handleServiceCheckboxChange = (serviceid: number) => {
+        setServiceCheckedlist((prevCheckedlist) => {
             if (prevCheckedlist.includes(serviceid)) {
                 return prevCheckedlist.filter(id => id !== serviceid);
             } else {
@@ -136,26 +160,46 @@ const Quotation = () => {
         });
     };
 
-    const handleRateChange = (index : number, rate : number) => {
-        if(servicelist != null){
-            const updatedServices  = [...servicelist];
+    const handleParagraphCheckboxChange = (sno: number) => {
+        setParagraphsCheckedlist((prevCheckedlist) => {
+            if (prevCheckedlist.includes(sno)) {
+                return prevCheckedlist.filter(id => id !== sno);
+            } else {
+                return [...prevCheckedlist, sno];
+            }
+        });
+    };
+
+    const handleRateChange = (index: number, rate: number) => {
+        if (servicelist != null) {
+            const updatedServices = [...servicelist];
             updatedServices[index].rate = rate;
 
             setServicelist(updatedServices);
         }
-       
+
 
 
     };
 
     const filterCheckedService = () => {
         const filtered = servicelist.filter((item) =>
-            checkedlist.includes(item.serviceid)
+            servicecheckedlist.includes(item.serviceid)
         );
 
         return filtered
     }
 
+    const filterCheckedParagraphs = () => {
+        const filtered = paragraphslist.filter((item) =>
+            paragraphscheckedlist.includes(item.sno)
+        );
+
+        return filtered
+    }
+
+
+   
 
     const handleCameraPress = () => {
         launchCamera({ mediaType: 'photo', quality: 1 }, async (response) => {
@@ -186,10 +230,12 @@ const Quotation = () => {
     const onSubmit = async (data: object): Promise<void> => {
         setPreview(true);
         const selectedservices = filterCheckedService();
+        const selectedparagraphs = filterCheckedParagraphs();
         const payload: object = {
             ...data,
             socpic: socpic,  // Include the image URI or Base64 string in the payload
             selectedservices, // Ensure you're spreading/selecting services properly
+            selectedparagraphs
         };
 
         setPreviewdata(payload);
@@ -625,13 +671,13 @@ const Quotation = () => {
 
                                         {/* Checkbox for each service */}
                                         <CheckBox
-                                            value={checkedlist.includes(item.serviceid)}
-                                            onValueChange={() => handleCheckboxChange(item.serviceid)}
+                                            value={servicecheckedlist.includes(item.serviceid)}
+                                            onValueChange={() => handleServiceCheckboxChange(item.serviceid)}
                                         />
 
 
                                         {/* Conditional input for rate when checkbox is selected */}
-                                        {checkedlist.includes(item.serviceid) && (
+                                        {servicecheckedlist.includes(item.serviceid) && (
                                             <TextInput
                                                 style={styles.checkboxinput}
                                                 placeholder='Enter Rate'
@@ -643,6 +689,41 @@ const Quotation = () => {
                             ))}
                         </View>
                     )}
+
+                    {
+                        paragraphslist && paragraphslist.length > 0 && (
+                            <View style={styles.service_section}>
+                                <Text style={{ fontSize: 20, color: "black" }}>Select Paragraphs :</Text>
+
+                                {paragraphslist.map((item, index) => (
+                                    <View key={index} style={styles.serviceItem}>
+                                        <View style={styles.checkboxContainer}>
+                                            {/* Render service name dynamically */}
+                                            <Text style={styles.label}>{item.name}</Text>
+
+                                            {/* Checkbox for each service */}
+                                            <CheckBox
+                                                value={paragraphscheckedlist.includes(item.sno)}
+                                                onValueChange={() => handleParagraphCheckboxChange(item.sno)}
+                                            />
+
+
+                                            {/* Conditional input for rate when checkbox is selected */}
+                                            {paragraphscheckedlist.includes(item.serviceid) && (
+                                                <TextInput
+                                                    style={styles.checkboxinput}
+                                                    placeholder='Enter Rate'
+                                                    // onChangeText={(text) => handleRateChange(index, text)}
+                                                />
+                                            )}
+                                        </View>
+                                    </View>
+                                ))}
+                            </View>
+                        )
+                    }
+
+
 
 
 

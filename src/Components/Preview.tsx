@@ -1,7 +1,9 @@
 import React from 'react';
-import { StyleSheet, Dimensions, View } from 'react-native';
+import { StyleSheet, Dimensions, View, TouchableOpacity , Text } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { useRoute } from '@react-navigation/native';
+import { apiurl } from '../Screens/Contant';
+import axios from 'axios';
 
 const screenHeight = Dimensions.get('window').height;
 const screenWidth = Dimensions.get('window').width;
@@ -10,21 +12,70 @@ const windowHeight = screenHeight - 300;
 const windowWidth = screenWidth - 40;
 
 const Preview = () => {
-  const route = useRoute();
-  const { payload } = route.params;
-  console.log(payload);
+    const route = useRoute();
+    const { payload } = route.params;
+    console.log(payload);
 
-  // Create the table rows from the payload
-  const serviceRows = payload.selectedservices.map(service => `
+    let totalflats = parseInt(payload.totalflatsrowhouse);
+
+    let totalshops = 0;
+    if (totalflats != null) {
+        totalshops = parseInt(payload.totalshops);
+    }
+
+    // Create the table rows from the payload
+    const serviceNameColumn = payload.selectedservices.map(service => `
     <tr>
       <td>${service.servicename}</td>
-      <td>${service.description || ''}</td>
-      <td>${service.cost || ''}</td>
-      <td>${service.total || ''}</td>
+      <td>NA</td>
+      <td>${service.rate}</td>
+      <td>${service.rate * (totalflats + totalshops)}</td>
     </tr>
-  `).join(''); // Join to avoid commas between rows
+  `).join('');
 
-  const htmlContent = `
+    // Step 1: Sort paragraphs based on sno
+    const sortedParagraphs = payload.selectedparagraphs.sort((a, b) => a.sno - b.sno);
+
+    // Step 2: Slice to include only the first 4
+    const FirstParagraphs = sortedParagraphs.slice(0, 4);
+
+    const SecondParagraphs = sortedParagraphs.slice(4, 8);
+
+
+
+    // Step 3: Map to generate HTML with incremental sno
+    const FirstPageParagraphs = FirstParagraphs.map((paragraph, index) => `
+    <p style="font-size: 1.1rem; text-align: justify;"><strong>${index + 1}.</strong>&nbsp;${paragraph.data}</p><br>
+`).join('');
+
+
+    const SecondPageParagraphs = SecondParagraphs.map((paragraph, index) => `
+    <p style="font-size: 1.1rem; text-align: justify;><strong>${index + 5}.</strong>&nbsp;${paragraph.data}</p><br>
+`).join('');
+
+
+
+
+
+
+
+    // Check if there's a paragraph with a `name` of 'table'
+    const containsTableParagraph = payload.selectedparagraphs.some(paragraph => paragraph.name === 'table');
+
+    // Generate the table HTML if `containsTableParagraph` is true
+    const tableHTML = containsTableParagraph ? `
+        <table class="service-table">
+            <tr>
+                <th>Type</th>
+                <th>Description</th>
+                <th>Cost (in Rupees)</th>
+                <th>Total</th>
+            </tr>
+            ${serviceNameColumn}
+        </table>
+    ` : '';
+
+    const htmlContent = `
 <html>
 
 <head>
@@ -42,14 +93,16 @@ const Preview = () => {
             width: 100%;
         }
 
-        .service-table{
+        .service-table {
             width: 100%;
             border-collapse: collapse;
         }
 
-        tr,td,th {
+        tr, td, th {
             border: 2px solid black;
             padding: 2px;
+            font-size: 1.1rem;
+            
         }
 
         .pages {
@@ -61,19 +114,18 @@ const Preview = () => {
             border: 1px solid #000;
             margin: auto;
             margin-bottom: 20px;
-            display: flex;
-            justify-content: center;
             margin-top: 2vh;
         }
 
         .pagecontainer {
             width: 90%;
             background-color: #fff;
+            margin: auto;
         }
 
         .pageheader {
             width: 100%;
-            height: 7vh;
+            height: 6vh;
             background-color: #fff;
             border-bottom: 5px solid #730A11;
             box-sizing: border-box;
@@ -87,7 +139,7 @@ const Preview = () => {
 
         .bottomheader {
             width: 100%;
-            height: 4vh;
+            height: 3vh;
         }
 
         .companyname {
@@ -109,11 +161,11 @@ const Preview = () => {
         .email {
             text-align: center;
             font-size: 0.9rem;
-            margin-bottom: 0.5vh;
         }
 
         .pagebody {
             padding: 3%;
+            font-size: 1rem;
         }
     </style>
     <script>
@@ -154,53 +206,87 @@ const Preview = () => {
                 <p style="text-align: justify;">
                     Thank you for considering Accwizz Business Solutions Private Limited for your accounting management and society management needs. We are pleased to provide you with a quotation for the services we offer, tailored to meet the requirements of your society.
                 </p><br><br>
-                <u><p style="font-weight: bold;">Details of Assignment</p></u><br>
+                 <u><p style="font-weight: bold;">Details of Assignment</p></u><br>
+                ${FirstPageParagraphs}
 
-                <table class="service-table">
-                    <tr>
-                        <th>Type</th>
-                        <th>Description</th>
-                        <th>Cost (in Rupees)</th>
-                        <th>Total</th>
-                    </tr>
-                    ${serviceRows} <!-- Dynamically populated rows here -->
-                </table>
+                ${tableHTML} <!-- Only include table if 'table' paragraph is present -->
             </div>
         </div>
+    </div>
+    <div class="pages">
+        <div class="pagecontainer">
+            <div class="pageheader">
+                <div class="topheader">
+                    <p class="companyname">ACCWIZZ BUSINESS SOLUTIONS PRIVATE LIMITED</p>
+
+                </div>
+                <div class="bottomheader">
+                    <p class="companyaddress">
+                        A-204, Bhaskar Commercial Complex, Mayekar Wadi, Virat Nagar, Near Platform no. 1 Virar west –
+                        401303
+                    </p>
+                    <p class="email">Email- <a href="info@accwizz.com">info@accwizz.com</a></p>
+                </div>
+            </div>
+            <div class="pagebody" style="padding-top : 3vh">
+                ${SecondPageParagraphs}
+            </div>
+
+        </div>
+       
     </div>
 </body>
 </html>
   `;
 
-  return (
-    <View style={styles.container}>
-      <WebView
-        originWhitelist={['*']}
-        source={{ html: htmlContent }}
-        style={styles.webview}
-        javaScriptEnabled={true}
-        scalesPageToFit={true}
-        automaticallyAdjustContentInsets={true}
-        nestedScrollEnabled={true}
-      />
-    </View>
-  );
+    const sendHtmlToServer = async (htmlContent) => {
+        try {
+            const response = await axios.post(`${apiurl}generatepdf`, { htmlContent }, {
+                responseType: 'blob', // Ensure response is treated as a binary blob
+            });
+
+        } catch (error) {
+            console.error('Error sending HTML to server:', error);
+        }
+    };
+
+    return (
+        <View style={styles.container}>
+            <WebView
+                originWhitelist={['*']}
+                source={{ html: htmlContent }}
+                style={styles.webview}
+                javaScriptEnabled={true}
+                scalesPageToFit={true}
+                automaticallyAdjustContentInsets={true}
+                nestedScrollEnabled={true}
+            />
+
+            <TouchableOpacity style={styles.button} onPress={sendHtmlToServer(htmlContent)}>
+                <Text>Press Here</Text>
+            </TouchableOpacity>
+
+        </View>
+    );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  webview: {
-    width: windowWidth,
-    height: windowHeight,
-    marginTop: 10,
-    borderRadius: 10,
-    borderWidth: 2,
-    borderColor: "red",
-  },
+    container: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    webview: {
+        width: windowWidth,
+        height: windowHeight,
+        marginTop: 10,
+        borderRadius: 10,
+        borderWidth: 2,
+        borderColor: "red",
+    },
+    button: {
+
+    }
 });
 
 export default Preview;

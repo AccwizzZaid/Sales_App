@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Dimensions, View, TouchableOpacity , Text } from 'react-native';
+import { StyleSheet, Dimensions, View, TouchableOpacity, Text } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { useRoute } from '@react-navigation/native';
 import { apiurl } from '../Screens/Contant';
@@ -41,6 +41,8 @@ const Preview = () => {
 
     const SecondParagraphs = sortedParagraphs.slice(4, 8);
 
+    const ThirdParagraphs = sortedParagraphs.slice(8, 12);
+
 
 
     // Step 3: Map to generate HTML with incremental sno
@@ -48,9 +50,12 @@ const Preview = () => {
     <p style="font-size: 1.1rem; text-align: justify;"><strong>${index + 1}.</strong>&nbsp;${paragraph.data}</p><br>
 `).join('');
 
-
     const SecondPageParagraphs = SecondParagraphs.map((paragraph, index) => `
-    <p style="font-size: 1.1rem; text-align: justify;><strong>${index + 5}.</strong>&nbsp;${paragraph.data}</p><br>
+    <p style="font-size: 1.1rem; text-align: justify;"><strong>${index + 5}.</strong>&nbsp;${paragraph.data}</p><br>
+`).join('');
+
+    const ThirdPageParagraphs = ThirdParagraphs.map((paragraph, index) => `
+<p style="font-size: 1.1rem; text-align: justify;"><strong>${index + 9}.</strong>&nbsp;${paragraph.data}</p><br>
 `).join('');
 
 
@@ -235,20 +240,36 @@ const Preview = () => {
         </div>
        
     </div>
+    <div class="pages">
+        <div class="pagecontainer">
+            <div class="pageheader">
+                <div class="topheader">
+                    <p class="companyname">ACCWIZZ BUSINESS SOLUTIONS PRIVATE LIMITED</p>
+
+                </div>
+                <div class="bottomheader">
+                    <p class="companyaddress">
+                        A-204, Bhaskar Commercial Complex, Mayekar Wadi, Virat Nagar, Near Platform no. 1 Virar west –
+                        401303
+                    </p>
+                    <p class="email">Email- <a href="info@accwizz.com">info@accwizz.com</a></p>
+                </div>
+            </div>
+            <div class="pagebody" style="padding-top : 3vh">
+                ${ThirdPageParagraphs}
+            </div>
+
+        </div>
+       
+    </div>
 </body>
 </html>
   `;
 
-    const sendHtmlToServer = async (htmlContent) => {
-        try {
-            const response = await axios.post(`${apiurl}generatepdf`, { htmlContent }, {
-                responseType: 'blob', // Ensure response is treated as a binary blob
-            });
+    const generatepdf = async() => {
+        const response = await axios.post(`${apiurl}generatepdf`,payload);
 
-        } catch (error) {
-            console.error('Error sending HTML to server:', error);
-        }
-    };
+    }
 
     return (
         <View style={styles.container}>
@@ -262,9 +283,13 @@ const Preview = () => {
                 nestedScrollEnabled={true}
             />
 
-            <TouchableOpacity style={styles.button} onPress={sendHtmlToServer(htmlContent)}>
-                <Text>Press Here</Text>
+            <TouchableOpacity
+                style={styles.button}
+
+            >
+                <Text onPress={generatepdf}>Press Here</Text>
             </TouchableOpacity>
+
 
         </View>
     );
@@ -285,7 +310,7 @@ const styles = StyleSheet.create({
         borderColor: "red",
     },
     button: {
-
+        backgroundColor: 'green'
     }
 });
 

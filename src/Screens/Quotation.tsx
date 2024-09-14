@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Text, View, TextInput, Button, StyleSheet, ScrollView, SafeAreaView, KeyboardAvoidingView, Platform, TouchableOpacity, Image } from 'react-native'
+import { Text, View, TextInput, Button, StyleSheet, ScrollView, SafeAreaView, KeyboardAvoidingView, Platform, TouchableOpacity, Image, Modal } from 'react-native'
 import { Controller, useForm } from 'react-hook-form'
 import { launchCamera } from 'react-native-image-picker'
 import { Dateinput } from '../Components/Dateinput'
@@ -113,7 +113,14 @@ const Quotation = () => {
 
     const [previewdata, setPreviewdata] = useState<object>({});
 
-    const [paragraphslist, setParagraphslist] = useState<[object]>({});
+    const [paragraphslist, setParagraphslist] = useState<[object]>([{}]);
+
+    const [editVisible, setEditVisible] = useState<boolean>(false);
+
+    const [selectedSno, setSelectedSno] = useState<number | null>(null);
+
+    const [inputValue, setInputValue] = useState('');
+
 
 
     const GetServices = async (): Promise<void> => {
@@ -130,13 +137,13 @@ const Quotation = () => {
             const response = await axios.get(`${apiurl}getparagraphs`);
             const paragraphdata = response.data.payload;
             setParagraphslist(paragraphdata);
-            
+
             const serialnumbers = paragraphdata.map((item) => {
                 return item.sno
-            }) 
+            })
 
-            console.log(serialnumbers , "This");
-            
+            console.log(serialnumbers, "This");
+
             setParagraphsCheckedlist(serialnumbers);
 
         } catch (error) {
@@ -199,7 +206,7 @@ const Quotation = () => {
     }
 
 
-   
+
 
     const handleCameraPress = () => {
         launchCamera({ mediaType: 'photo', quality: 1 }, async (response) => {
@@ -226,6 +233,29 @@ const Quotation = () => {
         });
     };
 
+    const togglePopup = (sno) => {
+        setSelectedSno(sno);
+        setInputValue(dispalayselectedparagraphdata(sno));
+        setEditVisible(!editVisible);
+      };
+    
+      const editparagraph = () => {
+        if (selectedSno !== null) {
+          const updatedData = paragraphslist.map(obj =>
+            obj.sno === selectedSno ? { ...obj, data: inputValue } : obj
+          );
+          setParagraphslist(updatedData);
+          setEditVisible(false);
+          setSelectedSno(null);
+        }
+      };
+    
+      const dispalayselectedparagraphdata = (sno) => {
+        const filteredParagraph = paragraphslist.find(item => item.sno === sno);
+        return filteredParagraph ? filteredParagraph.data : '';
+      };
+    
+      
 
     const onSubmit = async (data: object): Promise<void> => {
         setPreview(true);
@@ -690,51 +720,64 @@ const Quotation = () => {
                         </View>
                     )}
 
-                    {
-                        paragraphslist && paragraphslist.length > 0 && (
-                            <View style={styles.service_section}>
-                                <Text style={{ fontSize: 20, color: "black" }}>Select Paragraphs :</Text>
-
-                                {paragraphslist.map((item, index) => (
-                                    <View key={index} style={styles.serviceItem}>
-                                        <View style={styles.checkboxContainer}>
-                                            {/* Render service name dynamically */}
-                                            <Text style={styles.label}>{item.name}</Text>
-
-                                            {/* Checkbox for each service */}
-                                            <CheckBox
-                                                value={paragraphscheckedlist.includes(item.sno)}
-                                                onValueChange={() => handleParagraphCheckboxChange(item.sno)}
-                                            />
-
-
-                                            {/* Conditional input for rate when checkbox is selected */}
-                                            {paragraphscheckedlist.includes(item.serviceid) && (
-                                                <TextInput
-                                                    style={styles.checkboxinput}
-                                                    placeholder='Enter Rate'
-                                                    // onChangeText={(text) => handleRateChange(index, text)}
-                                                />
-                                            )}
-                                        </View>
+                    {paragraphslist && paragraphslist.length > 0 && (
+                        <View style={styles.service_section}>
+                            <Text style={{ fontSize: 20, color: 'black' }}>Select Paragraphs:</Text>
+                            {paragraphslist.map((item) => (
+                                <View key={item.sno} style={styles.serviceItem}>
+                                    <View style={styles.checkboxContainer}>
+                                        <Text onPress={() => togglePopup(item.sno)} style={styles.label}>
+                                            {item.name}
+                                        </Text>
+                                        <CheckBox
+                                            value={paragraphscheckedlist.includes(item.sno)}
+                                            onValueChange={() => handleParagraphCheckboxChange(item.sno)}
+                                        />
                                     </View>
-                                ))}
-                            </View>
-                        )
-                    }
-
-
-
-
-
-
+                                </View>
+                            ))}
+                        </View>
+                    )}
                     <Button title="Preview" onPress={handleSubmit(onSubmit)} />
-                    {/* {preview && (
-                        <Preview previewdata = {previewdata}/>
-                    )} */}
+                    <Modal
+                        transparent={true}
+                        visible={editVisible}
+                        animationType="slide"
+                        onRequestClose={() => setEditVisible(false)}
+                    >
+                        <View style={styles.modalContainer}>
+                            <View style={styles.modalContent}>
+                                <TextInput
+                                    style={styles.ModaltextInput}
+                                    value={inputValue}
+                                    editable={true}
+                                    multiline={true}
+                                    textAlignVertical='top'
+                                    onChangeText={text => setInputValue(text)}
+                                />
+                                <View style={{ display: 'flex', flexDirection: 'row', gap: 10 }}>
+                                    <TouchableOpacity
+                                        style={styles.modalEditButton}
+                                        onPress={editparagraph}
+                                    >
+                                        <Text style={{ margin: 'auto' }}>Edit</Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity
+                                        style={styles.modalCloseButton}
+                                        onPress={() => setEditVisible(false)}
+                                    >
+                                        <Text style={{ margin: 'auto' }}>Close</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+                        </View>
+                    </Modal>
+
 
 
                 </ScrollView>
+
+
 
             </KeyboardAvoidingView>
         </SafeAreaView>
@@ -815,7 +858,8 @@ const styles = StyleSheet.create({
         width: "100%",
         backgroundColor: "#dfdede",
         borderRadius: 10,
-        padding: 10
+        padding: 10,
+        marginTop: 10
     },
     checkboxinput: {
         borderColor: '#ccc',
@@ -824,6 +868,46 @@ const styles = StyleSheet.create({
         padding: 5,
         width: "30%",
         marginLeft: "5%"
+    },
+    editbox: {
+        width: "100%",
+        height: "50%",
+        backgroundColor: "green",
+
+    },
+    modalContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0,0,0,0.5)',
+    },
+    modalContent: {
+        width: '80%',
+        backgroundColor: '#fff',
+        padding: 20,
+        borderRadius: 10,
+        alignItems: 'center',
+    },
+    modalCloseButton: {
+        width: 60,
+        height: 40,
+        marginTop: 10,
+        backgroundColor: '#007bff',
+        borderRadius: 5,
+    },
+    modalEditButton: {
+        width: 60,
+        height: 40,
+        marginTop: 10,
+        backgroundColor: '#8F0E16',
+        borderRadius: 5,
+    },
+    modalButtonText: {
+        color: '#fff',
+        fontSize: 16,
+    },
+    ModaltextInput: {
+        borderWidth: 2
     }
 });
 

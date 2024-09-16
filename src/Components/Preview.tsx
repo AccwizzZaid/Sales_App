@@ -269,6 +269,7 @@ const Preview = () => {
     const generatepdf = async() => {
         const response = await axios.post(`${apiurl}generatepdf`,payload);
 
+
     }
 
     return (

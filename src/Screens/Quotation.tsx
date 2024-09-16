@@ -10,6 +10,7 @@ import Preview from '../Components/Preview'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import axios from 'axios'
 import { useNavigation } from '@react-navigation/native'
+import SelectDropdown from 'react-native-select-dropdown'
 
 
 
@@ -121,40 +122,53 @@ const Quotation = () => {
 
     const [inputValue, setInputValue] = useState('');
 
+    const [addresssectionvisible, setAddressSectionVisible] = useState<boolean>(false);
+
+    const [pincode, setPincode] = useState<number | null>(null);
+
+    const [demographicdata, setDemographicdata] = useState();
+
+    const [selectedaddress , setSelectedAddress ]  = useState({});
+
+    const [companyinformation , setCompanyInformation ] = useState();
 
 
-    const GetServices = async (): Promise<void> => {
+    const GetPdfInformation = async (): Promise<void> => {
         try {
-            const response = await axios.get(`${apiurl}getservices`);
-            setServicelist(response.data.payload);
-        } catch (error) {
-            console.log(error);
-        }
-    };
+            const serviceresponse = await axios.get(`${apiurl}getservices`);
+            setServicelist(serviceresponse.data.payload);
 
-    const GetParagraphs = async (): Promise<void> => {
-        try {
-            const response = await axios.get(`${apiurl}getparagraphs`);
-            const paragraphdata = response.data.payload;
+            const paragraphresponse = await axios.get(`${apiurl}getparagraphs`);
+            const paragraphdata = paragraphresponse.data.payload;
             setParagraphslist(paragraphdata);
 
             const serialnumbers = paragraphdata.map((item) => {
                 return item.sno
             })
 
-            console.log(serialnumbers, "This");
-
             setParagraphsCheckedlist(serialnumbers);
 
+            const companyinformationresponse = await axios.get(`${apiurl}getcompanyinformation`);
+
+            const companydata = companyinformationresponse.data.payload;
+
+            
+            
+            setCompanyInformation(companydata[0]);
+
+
+
+            
         } catch (error) {
             console.log(error);
+            
         }
     }
 
+  
 
     useEffect(() => {
-        GetServices();
-        GetParagraphs();
+        GetPdfInformation();
     }, [])
 
     const handleServiceCheckboxChange = (serviceid: number) => {
@@ -237,32 +251,59 @@ const Quotation = () => {
         setSelectedSno(sno);
         setInputValue(dispalayselectedparagraphdata(sno));
         setEditVisible(!editVisible);
-      };
-    
-      const editparagraph = () => {
+    };
+
+    const editparagraph = () => {
         if (selectedSno !== null) {
-          const updatedData = paragraphslist.map(obj =>
-            obj.sno === selectedSno ? { ...obj, data: inputValue } : obj
-          );
-          setParagraphslist(updatedData);
-          setEditVisible(false);
-          setSelectedSno(null);
+            const updatedData = paragraphslist.map(obj =>
+                obj.sno === selectedSno ? { ...obj, data: inputValue } : obj
+            );
+            setParagraphslist(updatedData);
+            setEditVisible(false);
+            setSelectedSno(null);
         }
-      };
-    
-      const dispalayselectedparagraphdata = (sno) => {
+    };
+
+    const dispalayselectedparagraphdata = (sno) => {
         const filteredParagraph = paragraphslist.find(item => item.sno === sno);
         return filteredParagraph ? filteredParagraph.data : '';
+    };
+
+    const RetrieveDemographicData = async (pincode: number) => {
+        console.log(pincode);
+
+
+        try {
+            const demographicResponse = await axios.get(`https://api.postalpincode.in/pincode/${pincode}`);
+            const responseData = demographicResponse.data;
+            if (responseData.length > 0) {
+                console.log(responseData[0].PostOffice);
+                setDemographicdata(responseData[0].PostOffice);
+                setAddressSectionVisible(true) 
+
+            } else {
+                console.log("No data found for the given pincode.");
+            }
+        } catch (error) {
+            console.error("Error retrieving demographic data:", error);
+        }
+    };
+
+    const onError = (errors) => {
+        console.error("Form errors:", errors);
       };
-    
-      
+
 
     const onSubmit = async (data: object): Promise<void> => {
+        console.log("triggerd");
+        
         setPreview(true);
         const selectedservices = filterCheckedService();
         const selectedparagraphs = filterCheckedParagraphs();
         const payload: object = {
             ...data,
+            ...selectedaddress,
+            ...companyinformation,
             socpic: socpic,  // Include the image URI or Base64 string in the payload
             selectedservices, // Ensure you're spreading/selecting services properly
             selectedparagraphs
@@ -272,20 +313,18 @@ const Quotation = () => {
 
         navigation.navigate('Preview', { payload });
 
+        // try {
+        //     // Send payload with correct headers
+        //     const addquotationresponse = await axios.post(`${apiurl}addquotation`, payload, {
+        //         headers: {
+        //             "Content-Type": "application/json",
+        //         },
+        //     });
 
-
-        try {
-            // Send payload with correct headers
-            const addquotationresponse = await axios.post(`${apiurl}addquotation`, payload, {
-                headers: {
-                    "Content-Type": "application/json",
-                },
-            });
-
-            console.log(addquotationresponse);
-        } catch (error) {
-            console.error("Error submitting form:", error);
-        }
+        //     console.log(addquotationresponse);
+        // } catch (error) {
+        //     console.error("Error submitting form:", error);
+        // }
     };
 
 
@@ -341,7 +380,97 @@ const Quotation = () => {
                         )}
                         name="registrationno"
                     />
+
                     {errors.registrationno && <Text style={styles.errortext}>This is required.</Text>}
+
+                    <Controller
+                        control={control}
+                        rules={{
+                            required: true,
+                        }}
+                        render={({ field: { onChange, onBlur, value } }) => (
+                            <View style={styles.inputcontainer}>
+                                <Text style={styles.labels}>Address :</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="Enter Address"
+                                    onBlur={onBlur}
+                                    onChangeText={onChange}
+                                    value={value}
+                                />
+                            </View>
+                        )}
+                        name="address"
+                    />
+
+                    {errors.address && <Text style={styles.errortext}>This is required.</Text>}
+
+
+
+                    <View style={styles.inputcontainer}>
+                        <Text style={styles.labels}>Enter Pincode :</Text>
+                        <View style={{ display: 'flex', flexDirection: 'row', gap: 20 }}>
+                            <TextInput
+                                style={{
+                                    width: "80%",
+                                    height: 40,
+                                    borderColor: '#ccc',
+                                    borderWidth: 1,
+                                    paddingHorizontal: 10,
+                                    borderRadius: 5
+                                }}
+                                placeholder="Enter Pincode"
+                                onChangeText={text => setPincode(parseInt(text))}
+                            />
+                            <TouchableOpacity
+                                style={{
+                                    width: "15%",
+                                    backgroundColor: "#730A11",
+                                    justifyContent: 'center',
+                                    alignItems: 'center', // Horizontal alignment
+                                    height: 40, // Match the TextInput height for better alignment
+                                    borderRadius: 5
+                                }}
+                            >
+                                <Text onPress={() => { RetrieveDemographicData(pincode); }} style={{ color: "#fff" }}>Go</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+
+                    {addresssectionvisible && (
+                        <View style={styles.inputcontainer}>
+                            <Text style={styles.label}>Select Area:</Text>
+                            <SelectDropdown
+                                data={demographicdata}
+                                onSelect={(selectedItem, index) => {
+                                    setSelectedAddress(selectedItem);
+                                }}
+                                renderButton={(selectedItem, isOpened) => {
+                                    return (
+                                        <View style={styles.dropdownButtonStyle}>
+                                            <Text style={styles.dropdownButtonTxtStyle}>
+                                                {(selectedItem && selectedItem.Name) || 'Select your area'}
+                                            </Text>
+                                        </View>
+                                    );
+                                }}
+                                renderItem={(item, index, isSelected) => {
+                                    return (
+                                        <View style={{ ...styles.dropdownItemStyle, ...(isSelected && { backgroundColor: '#D2D9DF' }) }}>
+                                            <Text style={styles.dropdownItemTxtStyle}>{item.Name}</Text>
+                                        </View>
+                                    );
+                                }}
+                                showsVerticalScrollIndicator={false}
+                                dropdownStyle={styles.dropdownMenuStyle}
+                            />
+
+
+                            {/* {selectedArea && (
+                                <Text style={styles.selectedText}>Selected Area: {selectedArea}</Text>
+                            )} */}
+                        </View>
+                    )}
 
                     <Controller
                         control={control}
@@ -381,6 +510,8 @@ const Quotation = () => {
                         )}
                         name="totalflatsrowhouse"
                     />
+
+
                     {errors.totalshops && <Text style={styles.errortext}>This is required.</Text>}
 
                     <Controller
@@ -440,6 +571,8 @@ const Quotation = () => {
                         )}
                         name="secretaryname"
                     />
+
+
                     {errors.secretaryname && <Text style={styles.errortext}>This is required.</Text>}
                     <Controller
                         control={control}
@@ -460,6 +593,8 @@ const Quotation = () => {
                         )}
                         name="secretaryno"
                     />
+
+
                     {errors.secretaryno && <Text style={styles.errortext}>This is required.</Text>}
 
 
@@ -479,7 +614,6 @@ const Quotation = () => {
                         )}
                         name="chairmanname"
                     />
-
 
 
                     <Controller
@@ -738,7 +872,7 @@ const Quotation = () => {
                             ))}
                         </View>
                     )}
-                    <Button title="Preview" onPress={handleSubmit(onSubmit)} />
+                    <Button title="Preview" onPress={handleSubmit(onSubmit , onError)} />
                     <Modal
                         transparent={true}
                         visible={editVisible}
@@ -772,8 +906,6 @@ const Quotation = () => {
                             </View>
                         </View>
                     </Modal>
-
-
 
                 </ScrollView>
 
@@ -908,7 +1040,55 @@ const styles = StyleSheet.create({
     },
     ModaltextInput: {
         borderWidth: 2
-    }
+    },
+    dropdownButtonStyle: {
+        width: "100%",
+        height: 40,
+        borderColor: '#ccc',
+        borderWidth: 1,
+        borderRadius: 5,
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingHorizontal: 8,
+        marginBottom: 10,         // Adds some space between inputs
+
+      },
+      dropdownButtonTxtStyle: {
+        flex: 1,
+        fontSize: 18,
+        fontWeight: '500',
+        color: '#151E26',
+      },
+      dropdownButtonArrowStyle: {
+        fontSize: 28,
+      },
+      dropdownButtonIconStyle: {
+        fontSize: 28,
+        marginRight: 8,
+      },
+      dropdownMenuStyle: {
+        backgroundColor: '#E9ECEF',
+        borderRadius: 8,
+      },
+      dropdownItemStyle: {
+        width: '100%',
+        flexDirection: 'row',
+        paddingHorizontal: 12,
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingVertical: 8,
+      },
+      dropdownItemTxtStyle: {
+        flex: 1,
+        fontSize: 18,
+        fontWeight: '500',
+        color: '#151E26',
+      },
+      dropdownItemIconStyle: {
+        fontSize: 28,
+        marginRight: 8,
+      },
 });
 
 

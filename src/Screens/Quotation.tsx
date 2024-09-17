@@ -269,7 +269,7 @@ const Quotation = () => {
         return filteredParagraph ? filteredParagraph.data : '';
     };
 
-    const RetrieveDemographicData = async (pincode: number) => {
+    const RetrieveDemographicData = async () => {
         console.log(pincode);
 
 
@@ -423,6 +423,7 @@ const Quotation = () => {
                                 onChangeText={text => setPincode(parseInt(text))}
                             />
                             <TouchableOpacity
+                                onPress={() => { RetrieveDemographicData(); } }
                                 style={{
                                     width: "15%",
                                     backgroundColor: "#730A11",
@@ -432,7 +433,7 @@ const Quotation = () => {
                                     borderRadius: 5
                                 }}
                             >
-                                <Text onPress={() => { RetrieveDemographicData(pincode); }} style={{ color: "#fff" }}>Go</Text>
+                                <Text style={{ color: "#fff" }}>Go</Text>
                             </TouchableOpacity>
                         </View>
                     </View>

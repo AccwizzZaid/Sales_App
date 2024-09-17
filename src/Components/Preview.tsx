@@ -33,15 +33,42 @@ const Preview = () => {
     </tr>
   `).join('');
 
+    const iterativeparagraph = payload.selectedparagraphs.filter((item) => item.name != "closingparagraphs" && item.type == 1);
+    console.log(iterativeparagraph);
+
+    const closingparagrapharray = payload.selectedparagraphs.filter((item) => item.name == "closingparagraphs" && item.type == 1);
+
+    let ClosingParagraphs = "";
+    if (closingparagrapharray.length > 0) {
+        const closingParagraphData = closingparagrapharray[0].data;
+
+        // Using map() to create the HTML
+        ClosingParagraphs = closingParagraphData.map(element => `
+        <p>${element}</p><br><br>
+    `).join('');
+    }
+
+
     // Step 1: Sort paragraphs based on sno
-    const sortedParagraphs = payload.selectedparagraphs.sort((a, b) => a.sno - b.sno);
+    const sortedParagraphs = iterativeparagraph.sort((a, b) => a.sno - b.sno);
+
+    const length = sortedParagraphs.length;
+
+    console.log(length);
+
+
+
 
     // Step 2: Slice to include only the first 4
     const FirstParagraphs = sortedParagraphs.slice(0, 4);
 
-    const SecondParagraphs = sortedParagraphs.slice(4, 8);
+    const SecondParagraphs = sortedParagraphs.slice(4, 10);
 
-    const ThirdParagraphs = sortedParagraphs.slice(8, 12);
+    let ThirdParagraphs = [];
+    if (length > 10) {
+        ThirdParagraphs = sortedParagraphs.slice(10, length);
+    }
+
 
 
 
@@ -51,12 +78,22 @@ const Preview = () => {
 `).join('');
 
     const SecondPageParagraphs = SecondParagraphs.map((paragraph, index) => `
-    <p style="font-size: 1.1rem; text-align: justify;"><strong>${index + 5}.</strong>&nbsp;${paragraph.data}</p><br>
+    <p style="font-size: 1.1rem; text-align: justify; white-space: pre;"><strong>${index + 5}.</strong>&nbsp;${paragraph.data}</p><br>
 `).join('');
+    let ThirdPageParagraphs = '';
+    if (length > 10) {
+        ThirdPageParagraphs = ThirdParagraphs.map((paragraph, index) => `
+        <p style="font-size: 1.1rem; text-align: justify;"><strong>${index + 11}.</strong>&nbsp;${paragraph.data}</p><br>
+        `).join('');
+    }
 
-    const ThirdPageParagraphs = ThirdParagraphs.map((paragraph, index) => `
-<p style="font-size: 1.1rem; text-align: justify;"><strong>${index + 9}.</strong>&nbsp;${paragraph.data}</p><br>
-`).join('');
+    const subjectParagraphobject = payload.selectedparagraphs.filter((item) => item.name == "subject");
+
+    const welcomeParagraphobject = payload.selectedparagraphs.filter((item) => item.name == "welcome_paragraph");
+
+    const subjectParagraph = subjectParagraphobject[0].data;
+
+    const welcomeParagraph = welcomeParagraphobject[0].data;
 
 
 
@@ -193,24 +230,27 @@ const Preview = () => {
         <div class="pagecontainer">
             <div class="pageheader">
                 <div class="topheader">
-                    <p class="companyname">ACCWIZZ BUSINESS SOLUTIONS PRIVATE LIMITED</p>
+                    <p class="companyname">${payload.companyname}</p>
                 </div>
                 <div class="bottomheader">
                     <p class="companyaddress">
-                        A-204, Bhaskar Commercial Complex, Mayekar Wadi, Virat Nagar, Near Platform no. 1 Virar west – 401303
+                        ${payload.companyaddress}
                     </p>
-                    <p class="email">Email- <a href="info@accwizz.com">info@accwizz.com</a></p>
+                     <div style="display: flex; flex-direction: row; justify-content: center; gap: 10px;">
+                        <p class="">${payload.cin}</p> 
+                    <p class="">Email - <a href="info@accwizz.com">${payload.email}</a></p>
+                    </div>
+
+                    
                 </div>
             </div>
             <div class="pagebody">
                 <p style="font-size: 2rem; text-align: center; font-weight: bold;">Quotation</p>
                 <p style="font-size: 1.2rem; text-align: end; font-weight: bold;">Date - <span class="current-date"></span></p><br>
-                <p>To,<br>Management committee,<br>Viva Raj Maitry CHSL,<br>Virar(W).</p><br>
-                <p style="text-indent: 2em;">Subject:- Quotation for Accounting & Facility Management Services of your Society premises.</p><br>
+                <p>To,<br>Management committee,<br>${payload.societyname},<br>${payload.Name}.</p><br>
+                <p style="text-indent: 2em;">Subject:- ${subjectParagraph}</p><br>
                 <p>Respected Chairman/ Secretary/ Treasurer</p>
-                <p style="text-align: justify;">
-                    Thank you for considering Accwizz Business Solutions Private Limited for your accounting management and society management needs. We are pleased to provide you with a quotation for the services we offer, tailored to meet the requirements of your society.
-                </p><br><br>
+                <p style="text-align: justify;">&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp${welcomeParagraph}</p><br><br>
                  <u><p style="font-weight: bold;">Details of Assignment</p></u><br>
                 ${FirstPageParagraphs}
 
@@ -222,15 +262,17 @@ const Preview = () => {
         <div class="pagecontainer">
             <div class="pageheader">
                 <div class="topheader">
-                    <p class="companyname">ACCWIZZ BUSINESS SOLUTIONS PRIVATE LIMITED</p>
+                    <p class="companyname">${payload.companyname}</p>
 
                 </div>
                 <div class="bottomheader">
                     <p class="companyaddress">
-                        A-204, Bhaskar Commercial Complex, Mayekar Wadi, Virat Nagar, Near Platform no. 1 Virar west –
-                        401303
+                    ${payload.companyaddress}
                     </p>
-                    <p class="email">Email- <a href="info@accwizz.com">info@accwizz.com</a></p>
+                    <div style="display: flex; flex-direction: row; justify-content: center; gap: 10px;">
+                        <p class="">${payload.cin}</p> 
+                    <p class="">Email - <a href="info@accwizz.com">${payload.email}</a></p>
+                    </div>
                 </div>
             </div>
             <div class="pagebody" style="padding-top : 3vh">
@@ -244,19 +286,28 @@ const Preview = () => {
         <div class="pagecontainer">
             <div class="pageheader">
                 <div class="topheader">
-                    <p class="companyname">ACCWIZZ BUSINESS SOLUTIONS PRIVATE LIMITED</p>
+                    <p class="companyname">${payload.companyname}</p>
 
                 </div>
                 <div class="bottomheader">
                     <p class="companyaddress">
-                        A-204, Bhaskar Commercial Complex, Mayekar Wadi, Virat Nagar, Near Platform no. 1 Virar west –
-                        401303
+                    ${payload.companyaddress}
                     </p>
-                    <p class="email">Email- <a href="info@accwizz.com">info@accwizz.com</a></p>
+                    <div style="display: flex; flex-direction: row; justify-content: center; gap: 10px;">
+                        <p class="">${payload.cin}</p> 
+                    <p class="">Email - <a href="info@accwizz.com">${payload.email}</a></p>
+                    </div>
                 </div>
             </div>
             <div class="pagebody" style="padding-top : 3vh">
-                ${ThirdPageParagraphs}
+                ${length > 10 ? ThirdPageParagraphs : ''}
+                ${ClosingParagraphs}<br>
+                <p style="text-align: center; color: #730A11;">${payload.companyname}</p>
+                
+             
+
+
+                
             </div>
 
         </div>
@@ -266,8 +317,8 @@ const Preview = () => {
 </html>
   `;
 
-    const generatepdf = async() => {
-        const response = await axios.post(`${apiurl}generatepdf`,payload);
+    const generatepdf = async () => {
+        const response = await axios.post(`${apiurl}generatepdf`, payload);
 
 
     }
@@ -286,10 +337,12 @@ const Preview = () => {
 
             <TouchableOpacity
                 style={styles.button}
-
+                activeOpacity={0.6} // Reduce opacity when pressed (0.0 to 1.0)
+                onPress={generatepdf} // Move this to TouchableOpacity for better accessibility
             >
-                <Text onPress={generatepdf}>Press Here</Text>
+                <Text style={{ textAlign: 'center', color: '#fff' , margin : 'auto' }}>Press Here</Text>
             </TouchableOpacity>
+
 
 
         </View>
@@ -298,20 +351,24 @@ const Preview = () => {
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
+        flex: 0.98,
         justifyContent: 'center',
         alignItems: 'center',
+
     },
     webview: {
         width: windowWidth,
         height: windowHeight,
-        marginTop: 10,
+        marginTop: 20,
+        marginBottom: 10,
         borderRadius: 10,
-        borderWidth: 2,
-        borderColor: "red",
+        borderBlockColor: 'yellow'
     },
     button: {
-        backgroundColor: 'green'
+        backgroundColor: '#730A11',
+        width: "25%",
+        height: "4%",
+        borderRadius: 10
     }
 });
 

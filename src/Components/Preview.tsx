@@ -78,8 +78,11 @@ const Preview = () => {
 `).join('');
 
     const SecondPageParagraphs = SecondParagraphs.map((paragraph, index) => `
-    <p style="font-size: 1.1rem; text-align: justify; white-space: pre;"><strong>${index + 5}.</strong>&nbsp;${paragraph.data}</p><br>
+<p style="font-size: 1.1rem;  white-space: ${paragraph.autoformat === false ? 'pre' : 'normal'};">
+<strong>${index + 5}.</strong>&nbsp;${paragraph.data}
+</p><br>
 `).join('');
+
     let ThirdPageParagraphs = '';
     if (length > 10) {
         ThirdPageParagraphs = ThirdParagraphs.map((paragraph, index) => `
@@ -340,7 +343,7 @@ const Preview = () => {
                 activeOpacity={0.6} // Reduce opacity when pressed (0.0 to 1.0)
                 onPress={generatepdf} // Move this to TouchableOpacity for better accessibility
             >
-                <Text style={{ textAlign: 'center', color: '#fff' , margin : 'auto' }}>Press Here</Text>
+                <Text style={{ textAlign: 'center', color: '#fff', margin: 'auto' }}>Press Here</Text>
             </TouchableOpacity>
 
 

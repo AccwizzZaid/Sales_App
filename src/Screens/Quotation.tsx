@@ -11,6 +11,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import axios from 'axios'
 import { useNavigation } from '@react-navigation/native'
 import SelectDropdown from 'react-native-select-dropdown'
+import { faL } from '@fortawesome/free-solid-svg-icons'
 
 
 
@@ -128,9 +129,22 @@ const Quotation = () => {
 
     const [demographicdata, setDemographicdata] = useState();
 
-    const [selectedaddress , setSelectedAddress ]  = useState({});
+    const [selectedaddress, setSelectedAddress] = useState({});
 
-    const [companyinformation , setCompanyInformation ] = useState();
+    const [companyinformation, setCompanyInformation] = useState();
+
+
+    // Section states for hiding and displaying parts of the form
+    const [section1, setSection1] = useState<boolean>(true);
+
+    const [section2, setSection2] = useState<boolean>(false);
+
+    const [section3, setSection3] = useState<boolean>(false);
+
+    const [section4, setSection4] = useState<boolean>(false);
+
+    const [section5, setSection5] = useState<boolean>(false);
+
 
 
     const GetPdfInformation = async (): Promise<void> => {
@@ -152,20 +166,20 @@ const Quotation = () => {
 
             const companydata = companyinformationresponse.data.payload;
 
-            
-            
+
+
             setCompanyInformation(companydata[0]);
 
 
 
-            
+
         } catch (error) {
             console.log(error);
-            
+
         }
     }
 
-  
+
 
     useEffect(() => {
         GetPdfInformation();
@@ -279,7 +293,7 @@ const Quotation = () => {
             if (responseData.length > 0) {
                 console.log(responseData[0].PostOffice);
                 setDemographicdata(responseData[0].PostOffice);
-                setAddressSectionVisible(true) 
+                setAddressSectionVisible(true)
 
             } else {
                 console.log("No data found for the given pincode.");
@@ -291,12 +305,12 @@ const Quotation = () => {
 
     const onError = (errors) => {
         console.error("Form errors:", errors);
-      };
+    };
 
 
     const onSubmit = async (data: object): Promise<void> => {
         console.log("triggerd");
-        
+
         setPreview(true);
         const selectedservices = filterCheckedService();
         const selectedparagraphs = filterCheckedParagraphs();
@@ -340,540 +354,665 @@ const Quotation = () => {
                         <Text style={styles.heading}>Create Quotation</Text>
                     </View>
 
-                    <Controller
-                        control={control}
-                        rules={{
-                            required: true,
-                        }}
-                        render={({ field: { onChange, onBlur, value } }) => (
-                            <View style={styles.inputcontainer}>
-                                <Text style={styles.labels}>Society Name : </Text>
+                    <View style={{ display: section1 ? 'flex' : 'none' }}>
+                        <Controller
+                            control={control}
+                            rules={{
+                                required: true,
+                            }}
+                            render={({ field: { onChange, onBlur, value } }) => (
+                                <View style={styles.inputcontainer}>
+                                    <Text style={styles.labels}>Society Name : </Text>
+                                    <TextInput
+                                        style={styles.input}
+                                        placeholder="  Society Name"
+                                        onBlur={onBlur}
+                                        onChangeText={onChange}
+                                        value={value}
+                                    />
+                                </View>
+                            )}
+                            name="societyname"
+                        />
+                        {errors.societyname && <Text style={styles.errortext}>This is required.</Text>}
+
+                        <Controller
+                            control={control}
+                            rules={{
+                                required: true,
+                            }}
+                            render={({ field: { onChange, onBlur, value } }) => (
+                                <View style={styles.inputcontainer}>
+                                    <Text style={styles.labels}>Registration Number :</Text>
+                                    <TextInput
+                                        style={styles.input}
+                                        placeholder="  Enter Registration Number"
+                                        onBlur={onBlur}
+                                        onChangeText={onChange}
+                                        value={value}
+                                    />
+                                </View>
+                            )}
+                            name="registrationno"
+                        />
+
+                        {errors.registrationno && <Text style={styles.errortext}>This is required.</Text>}
+
+                        <Controller
+                            control={control}
+                            rules={{
+                                required: true,
+                            }}
+                            render={({ field: { onChange, onBlur, value } }) => (
+                                <View style={styles.inputcontainer}>
+                                    <Text style={styles.labels}>Address :</Text>
+                                    <TextInput
+                                        style={styles.input}
+                                        placeholder="  Enter Address"
+                                        onBlur={onBlur}
+                                        onChangeText={onChange}
+                                        value={value}
+                                    />
+                                </View>
+                            )}
+                            name="address"
+                        />
+
+                        {errors.address && <Text style={styles.errortext}>This is required.</Text>}
+
+
+
+                        <View style={styles.inputcontainer}>
+                            <Text style={styles.labels}>Enter Pincode :</Text>
+                            <View style={{ display: 'flex', flexDirection: 'row', gap: 20 }}>
                                 <TextInput
-                                    style={styles.input}
-                                    placeholder="Society Name"
-                                    onBlur={onBlur}
-                                    onChangeText={onChange}
-                                    value={value}
+                                    style={{
+                                        width: "80%",
+                                        height: 40,
+                                        borderColor: '#ccc',
+                                        borderWidth: 1,
+                                        paddingHorizontal: 10,
+                                        borderRadius: 5
+                                    }}
+                                    placeholder=" Enter Pincode"
+                                    onChangeText={text => setPincode(parseInt(text))}
                                 />
+                                <TouchableOpacity
+                                    onPress={() => { RetrieveDemographicData(); }}
+                                    style={{
+                                        width: "15%",
+                                        backgroundColor: "#730A11",
+                                        justifyContent: 'center',
+                                        alignItems: 'center', // Horizontal alignment
+                                        height: 40, // Match the TextInput height for better alignment
+                                        borderRadius: 5
+                                    }}
+                                >
+                                    <Text style={{ color: "#fff" }}>Go</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+
+                        {addresssectionvisible && (
+                            <View style={styles.inputcontainer}>
+                                <Text style={styles.label}>Select Area:</Text>
+                                <SelectDropdown
+                                    data={demographicdata}
+                                    onSelect={(selectedItem, index) => {
+                                        setSelectedAddress(selectedItem);
+                                    }}
+                                    renderButton={(selectedItem, isOpened) => {
+                                        return (
+                                            <View style={styles.dropdownButtonStyle}>
+                                                <Text style={styles.dropdownButtonTxtStyle}>
+                                                    {(selectedItem && selectedItem.Name) || 'Select your area'}
+                                                </Text>
+                                            </View>
+                                        );
+                                    }}
+                                    renderItem={(item, index, isSelected) => {
+                                        return (
+                                            <View style={{ ...styles.dropdownItemStyle, ...(isSelected && { backgroundColor: '#D2D9DF' }) }}>
+                                                <Text style={styles.dropdownItemTxtStyle}>{item.Name}</Text>
+                                            </View>
+                                        );
+                                    }}
+                                    showsVerticalScrollIndicator={false}
+                                    dropdownStyle={styles.dropdownMenuStyle}
+                                />
+
+
+                                {/* {selectedArea && (
+                                <Text style={styles.selectedText}>Selected Area: {selectedArea}</Text>
+                            )} */}
                             </View>
                         )}
-                        name="societyname"
-                    />
-                    {errors.societyname && <Text style={styles.errortext}>This is required.</Text>}
 
-                    <Controller
-                        control={control}
-                        rules={{
-                            required: true,
-                        }}
-                        render={({ field: { onChange, onBlur, value } }) => (
-                            <View style={styles.inputcontainer}>
-                                <Text style={styles.labels}>Registration Number :</Text>
-                                <TextInput
-                                    style={styles.input}
-                                    placeholder="Enter Registration Number"
-                                    onBlur={onBlur}
-                                    onChangeText={onChange}
-                                    value={value}
-                                />
-                            </View>
-                        )}
-                        name="registrationno"
-                    />
+                        <Controller
+                            control={control}
+                            render={({ field: { onChange, onBlur, value } }) => (
+                                <View style={styles.inputcontainer}>
+                                    <Text style={styles.labels}>Email :</Text>
+                                    <TextInput
+                                        style={styles.input}
+                                        placeholder="  Enter Email"
+                                        onBlur={onBlur}
+                                        onChangeText={onChange}
+                                        value={value}
+                                    />
+                                </View>
+                            )}
+                            name="email"
+                        />
 
-                    {errors.registrationno && <Text style={styles.errortext}>This is required.</Text>}
-
-                    <Controller
-                        control={control}
-                        rules={{
-                            required: true,
-                        }}
-                        render={({ field: { onChange, onBlur, value } }) => (
-                            <View style={styles.inputcontainer}>
-                                <Text style={styles.labels}>Address :</Text>
-                                <TextInput
-                                    style={styles.input}
-                                    placeholder="Enter Address"
-                                    onBlur={onBlur}
-                                    onChangeText={onChange}
-                                    value={value}
-                                />
-                            </View>
-                        )}
-                        name="address"
-                    />
-
-                    {errors.address && <Text style={styles.errortext}>This is required.</Text>}
+                        <Controller
+                            control={control}
+                            rules={{
+                                required: true,
+                            }}
+                            render={({ field: { onChange, onBlur, value } }) => (
+                                <View style={styles.inputcontainer}>
+                                    <Text style={styles.labels}>No of Flats / Row Houses :</Text>
+                                    <TextInput
+                                        style={styles.input}
+                                        placeholder="  Enter Total Flats / Row Houses"
+                                        onBlur={onBlur}
+                                        keyboardType="numeric"   // Ensures the numeric keyboard pops up
+                                        onChangeText={onChange}
+                                        value={String(value)}    // Convert the number to a string for TextInput
+                                    />
+                                </View>
+                            )}
+                            name="totalflatsrowhouse"
+                        />
 
 
+                        {errors.totalshops && <Text style={styles.errortext}>This is required.</Text>}
 
-                    <View style={styles.inputcontainer}>
-                        <Text style={styles.labels}>Enter Pincode :</Text>
-                        <View style={{ display: 'flex', flexDirection: 'row', gap: 20 }}>
-                            <TextInput
-                                style={{
-                                    width: "80%",
-                                    height: 40,
-                                    borderColor: '#ccc',
-                                    borderWidth: 1,
-                                    paddingHorizontal: 10,
-                                    borderRadius: 5
-                                }}
-                                placeholder="Enter Pincode"
-                                onChangeText={text => setPincode(parseInt(text))}
-                            />
+                        <Controller
+                            control={control}
+                            render={({ field: { onChange, onBlur, value } }) => (
+                                <View style={styles.inputcontainer}>
+                                    <Text style={styles.labels}>No of Shops :</Text>
+                                    <TextInput
+                                        style={styles.input}
+                                        placeholder="  Enter Total Shops"
+                                        onBlur={onBlur}
+                                        keyboardType="numeric"   // Ensures the numeric keyboard pops up
+                                        onChangeText={onChange}
+                                        value={String(value)}    // Convert the number to a string for TextInput
+                                    />
+                                </View>
+                            )}
+                            name="totalshops"
+                        />
+
+                        <View style={{ display: 'flex', flexDirection: 'row', width: "100%", justifyContent: 'flex-end' }}>
                             <TouchableOpacity
-                                onPress={() => { RetrieveDemographicData(); } }
-                                style={{
-                                    width: "15%",
-                                    backgroundColor: "#730A11",
-                                    justifyContent: 'center',
-                                    alignItems: 'center', // Horizontal alignment
-                                    height: 40, // Match the TextInput height for better alignment
-                                    borderRadius: 5
-                                }}
+                                style={styles.nextbtn}
+                                onPress={() => { setSection1(false); setSection2(true) }}
                             >
-                                <Text style={{ color: "#fff" }}>Go</Text>
+                                <Text style={{ margin: 'auto', color: '#fff' }}>Next</Text>
+                            </TouchableOpacity>
+                        </View>
+
+                    </View>
+
+                    <View style={{ display: section2 ? 'flex' : 'none' }}>
+
+
+
+                        <Controller
+                            control={control}
+                            render={({ field: { onChange, onBlur, value } }) => (
+                                <View style={styles.inputcontainer}>
+                                    <Text style={styles.labels}>Insurance Secure Amount :</Text>
+                                    <TextInput
+                                        style={styles.input}
+                                        placeholder="  Enter Insurance Secure Amount"
+                                        onBlur={onBlur}
+                                        keyboardType="numeric"   // Ensures the numeric keyboard pops up
+                                        onChangeText={onChange}
+                                        value={String(value)}    // Convert the number to a string for TextInput
+                                    />
+
+                                </View>
+                            )}
+                            name="insurancesecureamt"
+                        />
+
+                        <Controller
+                            control={control}
+                            rules={{
+                                required: true,
+                            }}
+                            render={({ field: { onChange, onBlur, value } }) => (
+                                <View style={styles.inputcontainer}>
+                                    <Text style={styles.labels}>Secretary Name :</Text>
+                                    <TextInput
+                                        style={styles.input}
+                                        placeholder="Enter Secretary Name"
+                                        onBlur={onBlur}
+                                        onChangeText={onChange}
+                                        value={value}
+                                    />
+                                </View>
+                            )}
+                            name="secretaryname"
+                        />
+
+
+                        {errors.secretaryname && <Text style={styles.errortext}>This is required.</Text>}
+                        <Controller
+                            control={control}
+                            rules={{
+                                required: true,
+                            }}
+                            render={({ field: { onChange, onBlur, value } }) => (
+                                <View style={styles.inputcontainer}>
+                                    <Text style={styles.labels}>Secretary No :</Text>
+                                    <TextInput
+                                        style={styles.input}
+                                        placeholder="Enter Secretary No"
+                                        onBlur={onBlur}
+                                        onChangeText={onChange}
+                                        value={String(value)}
+                                    />
+                                </View>
+                            )}
+                            name="secretaryno"
+                        />
+
+
+                        {errors.secretaryno && <Text style={styles.errortext}>This is required.</Text>}
+
+
+                        <Controller
+                            control={control}
+                            render={({ field: { onChange, onBlur, value } }) => (
+                                <View style={styles.inputcontainer}>
+                                    <Text style={styles.labels}>Chairman Name :</Text>
+                                    <TextInput
+                                        style={styles.input}
+                                        placeholder="Enter Chairman Name"
+                                        onBlur={onBlur}
+                                        onChangeText={onChange}
+                                        value={value}
+                                    />
+                                </View>
+                            )}
+                            name="chairmanname"
+                        />
+
+
+                        <Controller
+                            control={control}
+                            render={({ field: { onChange, onBlur, value } }) => (
+                                <View style={styles.inputcontainer}>
+                                    <Text style={styles.labels}>Chairman No :</Text>
+                                    <TextInput
+                                        style={styles.input}
+                                        placeholder="Enter Chairman No"
+                                        onBlur={onBlur}
+                                        onChangeText={onChange}
+                                        value={String(value)}
+                                    />
+                                </View>
+                            )}
+                            name="chairmanno"
+                        />
+
+
+
+                        <Controller
+                            control={control}
+                            render={({ field: { onChange, onBlur, value } }) => (
+                                <View style={styles.inputcontainer}>
+                                    <Text style={styles.labels}>Treasurer Name :</Text>
+                                    <TextInput
+                                        style={styles.input}
+                                        placeholder="Enter Treasurer Name"
+                                        onBlur={onBlur}
+                                        onChangeText={onChange}
+                                        value={value}
+                                    />
+                                </View>
+                            )}
+                            name="treasurername"
+                        />
+
+
+                        <Controller
+                            control={control}
+                            render={({ field: { onChange, onBlur, value } }) => (
+                                <View style={styles.inputcontainer}>
+                                    <Text style={styles.labels}>Treasurer No :</Text>
+                                    <TextInput
+                                        style={styles.input}
+                                        placeholder="Enter Treasurer No"
+                                        onBlur={onBlur}
+                                        onChangeText={onChange}
+                                        value={String(value)}
+                                    />
+                                </View>
+                            )}
+                            name="treasurerno"
+                        />
+                        <Controller
+                            control={control}
+                            render={({ field: { onChange, onBlur, value } }) => (
+                                <View style={styles.inputcontainer}>
+                                    <Text style={styles.labels}>First Committee Member Name :</Text>
+                                    <TextInput
+                                        style={styles.input}
+                                        placeholder="Enter First Committee Member Name"
+                                        onBlur={onBlur}
+                                        onChangeText={onChange}
+                                        value={value}
+                                    />
+                                </View>
+                            )}
+                            name="comm1name"
+                        />
+                        <Controller
+                            control={control}
+                            render={({ field: { onChange, onBlur, value } }) => (
+                                <View style={styles.inputcontainer}>
+                                    <Text style={styles.labels}>First Committee Member Name :</Text>
+                                    <TextInput
+                                        style={styles.input}
+                                        placeholder="Enter First Committee Member Name"
+                                        onBlur={onBlur}
+                                        onChangeText={onChange}
+                                        value={value}
+                                    />
+                                </View>
+                            )}
+                            name="comm1name"
+                        />
+
+                        <View style={{ display: 'flex', flexDirection: 'row', width: "100%", justifyContent: 'space-between' }}>
+                            <TouchableOpacity
+                                style={styles.previousbtn}
+                                onPress={() => { setSection2(false); setSection1(true) }}
+                            >
+                                <Text style={{ margin: 'auto', color: '#fff' }}>Previous</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={styles.nextbtn}
+                                onPress={() => { setSection2(false); setSection3(true) }}
+                            >
+                                <Text style={{ margin: 'auto', color: '#fff' }}>Next</Text>
+                            </TouchableOpacity>
+                        </View>
+
+                    </View>
+
+                    <View style={{ display: section3 ? 'flex' : 'none' }}>
+                        <Controller
+                            control={control}
+                            render={({ field: { onChange, onBlur, value } }) => (
+                                <View style={styles.inputcontainer}>
+                                    <Text style={styles.labels}>First Committee Member Name :</Text>
+                                    <TextInput
+                                        style={styles.input}
+                                        placeholder="Enter First Committee Member Name"
+                                        onBlur={onBlur}
+                                        onChangeText={onChange}
+                                        value={value}
+                                    />
+                                </View>
+                            )}
+                            name="comm1name"
+                        />
+
+
+                        <Controller
+                            control={control}
+                            render={({ field: { onChange, onBlur, value } }) => (
+                                <View style={styles.inputcontainer}>
+                                    <Text style={styles.labels}>First Committee Member Contact :</Text>
+                                    <TextInput
+                                        style={styles.input}
+                                        placeholder="Enter First Committee Member Contact"
+                                        onBlur={onBlur}
+                                        onChangeText={onChange}
+                                        value={String(value)}
+                                    />
+                                </View>
+                            )}
+                            name="comm1no"
+                        />
+
+
+                        <Controller
+                            control={control}
+                            render={({ field: { onChange, onBlur, value } }) => (
+                                <View style={styles.inputcontainer}>
+                                    <Text style={styles.labels}>Second Committee Member Name:</Text>
+                                    <TextInput
+                                        style={styles.input}
+                                        placeholder="Enter Second Committee Member Name"
+                                        onBlur={onBlur}
+                                        onChangeText={onChange}
+                                        value={value}
+                                    />
+                                </View>
+                            )}
+                            name="comm2name"
+                        />
+
+                        <Controller
+                            control={control}
+                            render={({ field: { onChange, onBlur, value } }) => (
+                                <View style={styles.inputcontainer}>
+                                    <Text style={styles.labels}>Second Committee Member Contact:</Text>
+                                    <TextInput
+                                        style={styles.input}
+                                        placeholder="Enter Second Committee Member Contact"
+                                        onBlur={onBlur}
+                                        onChangeText={onChange}
+                                        value={String(value)}
+                                    />
+                                </View>
+                            )}
+                            name="comm2no"
+                        />
+
+                        <Controller
+                            control={control}
+                            render={({ field: { onChange, onBlur, value } }) => (
+                                <View style={styles.inputcontainer}>
+                                    <Text style={styles.labels}>Security Guard Number :</Text>
+                                    <TextInput
+                                        style={styles.input}
+                                        placeholder="Enter Security Guard Number"
+                                        onBlur={onBlur}
+                                        onChangeText={onChange}
+                                        value={String(value)}
+                                    />
+                                </View>
+                            )}
+                            name="securityguardno"
+                        />
+
+                        <Controller
+                            control={control}
+                            render={({ field: { onChange, onBlur, value } }) => (
+                                <View style={styles.inputcontainer}>
+                                    <Text style={styles.labels}>Security Superintendent Number :</Text>
+                                    <TextInput
+                                        style={styles.input}
+                                        placeholder="Enter Security Superintendent Number"
+                                        onBlur={onBlur}
+                                        onChangeText={onChange}
+                                        value={String(value)}
+                                    />
+                                </View>
+                            )}
+                            name="securitysupno"
+                        />
+
+                        <Controller
+                            control={control}
+                            rules={{
+                                required: true,
+                            }}
+                            name="nextfollowupdate"
+                            render={({ field: { onChange, onBlur, value } }) => (
+                                <View style={styles.inputcontainer}>
+                                    <Text style={styles.labels}>Select Follow Up Date:</Text>
+                                    <Dateinput value={value} onChange={onChange} />
+                                </View>
+                            )}
+                        />
+
+                        {errors.nextfollowupdate && <Text style={styles.errortext}>This is required.</Text>}
+
+
+                        <Controller
+                            control={control}
+                            rules={{
+                                required: true,
+                            }}
+                            name="nextFollowuptime"
+                            render={({ field: { onChange, onBlur, value } }) => (
+                                <View style={styles.inputcontainer}>
+                                    <Text style={styles.labels}>Select Follow Up Date:</Text>
+                                    <Timeinput value={value} onChange={onChange} />
+                                </View>
+                            )}
+                        />
+
+                        {errors.nextFollowuptime && <Text style={styles.errortext}>This is required.</Text>}
+
+
+
+
+
+
+
+                        <Text style={styles.labels}>Society Picture:</Text>
+                        <TouchableOpacity style={styles.cameraButton} onPress={handleCameraPress}>
+                            <Text style={styles.cameraButtonText}>Take a Picture</Text>
+                        </TouchableOpacity>
+
+                        {imageUri && (
+                            <Image source={{ uri: imageUri }} style={styles.previewImage} />
+                        )}
+
+                        <View style={{ display: 'flex', flexDirection: 'row', width: "100%", justifyContent: 'space-between' }}>
+                            <TouchableOpacity
+                                style={styles.previousbtn}
+                                onPress={() => { setSection3(false); setSection2(true) }}
+                            >
+                                <Text style={{ margin: 'auto', color: '#fff' }}>Previous</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={styles.nextbtn}
+                                onPress={() => { setSection3(false); setSection4(true) }}
+                            >
+                                <Text style={{ margin: 'auto', color: '#fff' }}>Next</Text>
+                            </TouchableOpacity>
+                        </View>
+
+                    </View>
+
+                    <View style={{ display: section4 ? 'flex' : 'none' }}>
+                        {servicelist && servicelist.length > 0 && (
+                            <View style={styles.service_section}>
+                                <Text style={{ fontSize: 20, color: "black" }}>Services :</Text>
+
+                                {servicelist.map((item, index) => (
+                                    <View key={index} style={styles.serviceItem}>
+                                        <View style={styles.checkboxContainer}>
+                                            {/* Render service name dynamically */}
+                                            <Text style={styles.label}>{item.servicename}</Text>
+
+                                            {/* Checkbox for each service */}
+                                            <CheckBox
+                                                value={servicecheckedlist.includes(item.serviceid)}
+                                                onValueChange={() => handleServiceCheckboxChange(item.serviceid)}
+                                            />
+
+
+                                            {/* Conditional input for rate when checkbox is selected */}
+                                            {servicecheckedlist.includes(item.serviceid) && (
+                                                <TextInput
+                                                    style={styles.checkboxinput}
+                                                    placeholder='Enter Rate'
+                                                    onChangeText={(text) => handleRateChange(index, text)}
+                                                />
+                                            )}
+                                        </View>
+                                    </View>
+                                ))}
+                            </View>
+                        )}
+
+                        <View style={{ display: 'flex', flexDirection: 'row', width: "100%", justifyContent: 'space-between' }}>
+                            <TouchableOpacity
+                                style={styles.previousbtn}
+                                onPress={() => { setSection4(false); setSection3(true) }}
+                            >
+                                <Text style={{ margin: 'auto', color: '#fff' }}>Previous</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={styles.nextbtn}
+                                onPress={() => { setSection4(false); setSection5(true) }}
+                            >
+                                <Text style={{ margin: 'auto', color: '#fff' }}>Next</Text>
                             </TouchableOpacity>
                         </View>
                     </View>
 
-                    {addresssectionvisible && (
-                        <View style={styles.inputcontainer}>
-                            <Text style={styles.label}>Select Area:</Text>
-                            <SelectDropdown
-                                data={demographicdata}
-                                onSelect={(selectedItem, index) => {
-                                    setSelectedAddress(selectedItem);
-                                }}
-                                renderButton={(selectedItem, isOpened) => {
-                                    return (
-                                        <View style={styles.dropdownButtonStyle}>
-                                            <Text style={styles.dropdownButtonTxtStyle}>
-                                                {(selectedItem && selectedItem.Name) || 'Select your area'}
+
+                    <View style={{ display: section5 ? 'flex' : 'none' }}>
+                        {paragraphslist && paragraphslist.length > 0 && (
+                            <View style={styles.paragraph_section}>
+                                <Text style={{ fontSize: 20, color: 'black' }}>Select Paragraphs:</Text>
+                                {paragraphslist.map((item) => (
+                                    <View key={item.sno} style={styles.serviceItem}>
+                                        <View style={styles.checkboxContainer}>
+                                            <Text onPress={() => togglePopup(item.sno)} style={styles.label}>
+                                                {item.name}
                                             </Text>
-                                        </View>
-                                    );
-                                }}
-                                renderItem={(item, index, isSelected) => {
-                                    return (
-                                        <View style={{ ...styles.dropdownItemStyle, ...(isSelected && { backgroundColor: '#D2D9DF' }) }}>
-                                            <Text style={styles.dropdownItemTxtStyle}>{item.Name}</Text>
-                                        </View>
-                                    );
-                                }}
-                                showsVerticalScrollIndicator={false}
-                                dropdownStyle={styles.dropdownMenuStyle}
-                            />
-
-
-                            {/* {selectedArea && (
-                                <Text style={styles.selectedText}>Selected Area: {selectedArea}</Text>
-                            )} */}
-                        </View>
-                    )}
-
-                    <Controller
-                        control={control}
-                        render={({ field: { onChange, onBlur, value } }) => (
-                            <View style={styles.inputcontainer}>
-                                <Text style={styles.labels}>Email :</Text>
-                                <TextInput
-                                    style={styles.input}
-                                    placeholder="Enter Total"
-                                    onBlur={onBlur}
-                                    onChangeText={onChange}
-                                    value={value}
-                                />
-                            </View>
-                        )}
-                        name="email"
-                    />
-
-
-                    <Controller
-                        control={control}
-                        rules={{
-                            required: true,
-                        }}
-                        render={({ field: { onChange, onBlur, value } }) => (
-                            <View style={styles.inputcontainer}>
-                                <Text style={styles.labels}>No of Flats / Row Houses :</Text>
-                                <TextInput
-                                    style={styles.input}
-                                    placeholder="Enter Total Flats / Row Houses"
-                                    onBlur={onBlur}
-                                    keyboardType="numeric"   // Ensures the numeric keyboard pops up
-                                    onChangeText={onChange}
-                                    value={String(value)}    // Convert the number to a string for TextInput
-                                />
-                            </View>
-                        )}
-                        name="totalflatsrowhouse"
-                    />
-
-
-                    {errors.totalshops && <Text style={styles.errortext}>This is required.</Text>}
-
-                    <Controller
-                        control={control}
-                        render={({ field: { onChange, onBlur, value } }) => (
-                            <View style={styles.inputcontainer}>
-                                <Text style={styles.labels}>No of Shops :</Text>
-                                <TextInput
-                                    style={styles.input}
-                                    placeholder="Enter Total Shops"
-                                    onBlur={onBlur}
-                                    keyboardType="numeric"   // Ensures the numeric keyboard pops up
-                                    onChangeText={onChange}
-                                    value={String(value)}    // Convert the number to a string for TextInput
-                                />
-                            </View>
-                        )}
-                        name="totalshops"
-                    />
-
-
-                    <Controller
-                        control={control}
-                        render={({ field: { onChange, onBlur, value } }) => (
-                            <View style={styles.inputcontainer}>
-                                <Text style={styles.labels}>Insurance Secure Amount :</Text>
-                                <TextInput
-                                    style={styles.input}
-                                    placeholder="Enter Insurance Secure Amount"
-                                    onBlur={onBlur}
-                                    keyboardType="numeric"   // Ensures the numeric keyboard pops up
-                                    onChangeText={onChange}
-                                    value={String(value)}    // Convert the number to a string for TextInput
-                                />
-
-                            </View>
-                        )}
-                        name="insurancesecureamt"
-                    />
-
-                    <Controller
-                        control={control}
-                        rules={{
-                            required: true,
-                        }}
-                        render={({ field: { onChange, onBlur, value } }) => (
-                            <View style={styles.inputcontainer}>
-                                <Text style={styles.labels}>Secretary Name :</Text>
-                                <TextInput
-                                    style={styles.input}
-                                    placeholder="Enter Secretary Name"
-                                    onBlur={onBlur}
-                                    onChangeText={onChange}
-                                    value={value}
-                                />
-                            </View>
-                        )}
-                        name="secretaryname"
-                    />
-
-
-                    {errors.secretaryname && <Text style={styles.errortext}>This is required.</Text>}
-                    <Controller
-                        control={control}
-                        rules={{
-                            required: true,
-                        }}
-                        render={({ field: { onChange, onBlur, value } }) => (
-                            <View style={styles.inputcontainer}>
-                                <Text style={styles.labels}>Secretary No :</Text>
-                                <TextInput
-                                    style={styles.input}
-                                    placeholder="Enter Secretary No"
-                                    onBlur={onBlur}
-                                    onChangeText={onChange}
-                                    value={String(value)}
-                                />
-                            </View>
-                        )}
-                        name="secretaryno"
-                    />
-
-
-                    {errors.secretaryno && <Text style={styles.errortext}>This is required.</Text>}
-
-
-                    <Controller
-                        control={control}
-                        render={({ field: { onChange, onBlur, value } }) => (
-                            <View style={styles.inputcontainer}>
-                                <Text style={styles.labels}>Chairman Name :</Text>
-                                <TextInput
-                                    style={styles.input}
-                                    placeholder="Enter Chairman Name"
-                                    onBlur={onBlur}
-                                    onChangeText={onChange}
-                                    value={value}
-                                />
-                            </View>
-                        )}
-                        name="chairmanname"
-                    />
-
-
-                    <Controller
-                        control={control}
-                        render={({ field: { onChange, onBlur, value } }) => (
-                            <View style={styles.inputcontainer}>
-                                <Text style={styles.labels}>Chairman No :</Text>
-                                <TextInput
-                                    style={styles.input}
-                                    placeholder="Enter Chairman No"
-                                    onBlur={onBlur}
-                                    onChangeText={onChange}
-                                    value={String(value)}
-                                />
-                            </View>
-                        )}
-                        name="chairmanno"
-                    />
-
-
-
-                    <Controller
-                        control={control}
-                        render={({ field: { onChange, onBlur, value } }) => (
-                            <View style={styles.inputcontainer}>
-                                <Text style={styles.labels}>Treasurer Name :</Text>
-                                <TextInput
-                                    style={styles.input}
-                                    placeholder="Enter Treasurer Name"
-                                    onBlur={onBlur}
-                                    onChangeText={onChange}
-                                    value={value}
-                                />
-                            </View>
-                        )}
-                        name="treasurername"
-                    />
-
-
-                    <Controller
-                        control={control}
-                        render={({ field: { onChange, onBlur, value } }) => (
-                            <View style={styles.inputcontainer}>
-                                <Text style={styles.labels}>Treasurer No :</Text>
-                                <TextInput
-                                    style={styles.input}
-                                    placeholder="Enter Treasurer No"
-                                    onBlur={onBlur}
-                                    onChangeText={onChange}
-                                    value={String(value)}
-                                />
-                            </View>
-                        )}
-                        name="treasurerno"
-                    />
-
-
-                    <Controller
-                        control={control}
-                        render={({ field: { onChange, onBlur, value } }) => (
-                            <View style={styles.inputcontainer}>
-                                <Text style={styles.labels}>First Committee Member Name :</Text>
-                                <TextInput
-                                    style={styles.input}
-                                    placeholder="Enter First Committee Member Name"
-                                    onBlur={onBlur}
-                                    onChangeText={onChange}
-                                    value={value}
-                                />
-                            </View>
-                        )}
-                        name="comm1name"
-                    />
-
-
-                    <Controller
-                        control={control}
-                        render={({ field: { onChange, onBlur, value } }) => (
-                            <View style={styles.inputcontainer}>
-                                <Text style={styles.labels}>First Committee Member Contact :</Text>
-                                <TextInput
-                                    style={styles.input}
-                                    placeholder="Enter First Committee Member Contact"
-                                    onBlur={onBlur}
-                                    onChangeText={onChange}
-                                    value={String(value)}
-                                />
-                            </View>
-                        )}
-                        name="comm1no"
-                    />
-
-
-                    <Controller
-                        control={control}
-                        render={({ field: { onChange, onBlur, value } }) => (
-                            <View style={styles.inputcontainer}>
-                                <Text style={styles.labels}>Second Committee Member Name:</Text>
-                                <TextInput
-                                    style={styles.input}
-                                    placeholder="Enter Second Committee Member Name"
-                                    onBlur={onBlur}
-                                    onChangeText={onChange}
-                                    value={value}
-                                />
-                            </View>
-                        )}
-                        name="comm2name"
-                    />
-
-                    <Controller
-                        control={control}
-                        render={({ field: { onChange, onBlur, value } }) => (
-                            <View style={styles.inputcontainer}>
-                                <Text style={styles.labels}>Second Committee Member Contact:</Text>
-                                <TextInput
-                                    style={styles.input}
-                                    placeholder="Enter Second Committee Member Contact"
-                                    onBlur={onBlur}
-                                    onChangeText={onChange}
-                                    value={String(value)}
-                                />
-                            </View>
-                        )}
-                        name="comm2no"
-                    />
-
-                    <Controller
-                        control={control}
-                        render={({ field: { onChange, onBlur, value } }) => (
-                            <View style={styles.inputcontainer}>
-                                <Text style={styles.labels}>Security Guard Number :</Text>
-                                <TextInput
-                                    style={styles.input}
-                                    placeholder="Enter Security Guard Number"
-                                    onBlur={onBlur}
-                                    onChangeText={onChange}
-                                    value={String(value)}
-                                />
-                            </View>
-                        )}
-                        name="securityguardno"
-                    />
-
-                    <Controller
-                        control={control}
-                        render={({ field: { onChange, onBlur, value } }) => (
-                            <View style={styles.inputcontainer}>
-                                <Text style={styles.labels}>Security Superintendent Number :</Text>
-                                <TextInput
-                                    style={styles.input}
-                                    placeholder="Enter Security Superintendent Number"
-                                    onBlur={onBlur}
-                                    onChangeText={onChange}
-                                    value={String(value)}
-                                />
-                            </View>
-                        )}
-                        name="securitysupno"
-                    />
-
-                    <Controller
-                        control={control}
-                        rules={{
-                            required: true,
-                        }}
-                        name="nextfollowupdate"
-                        render={({ field: { onChange, onBlur, value } }) => (
-                            <View style={styles.inputcontainer}>
-                                <Text style={styles.labels}>Select Follow Up Date:</Text>
-                                <Dateinput value={value} onChange={onChange} />
-                            </View>
-                        )}
-                    />
-
-                    {errors.nextfollowupdate && <Text style={styles.errortext}>This is required.</Text>}
-
-
-                    <Controller
-                        control={control}
-                        rules={{
-                            required: true,
-                        }}
-                        name="nextFollowuptime"
-                        render={({ field: { onChange, onBlur, value } }) => (
-                            <View style={styles.inputcontainer}>
-                                <Text style={styles.labels}>Select Follow Up Date:</Text>
-                                <Timeinput value={value} onChange={onChange} />
-                            </View>
-                        )}
-                    />
-
-                    {errors.nextFollowuptime && <Text style={styles.errortext}>This is required.</Text>}
-
-
-
-
-
-
-
-                    <Text style={styles.labels}>Society Picture:</Text>
-                    <TouchableOpacity style={styles.cameraButton} onPress={handleCameraPress}>
-                        <Text style={styles.cameraButtonText}>Take a Picture</Text>
-                    </TouchableOpacity>
-
-                    {imageUri && (
-                        <Image source={{ uri: imageUri }} style={styles.previewImage} />
-                    )}
-
-                    {servicelist && servicelist.length > 0 && (
-                        <View style={styles.service_section}>
-                            <Text style={{ fontSize: 20, color: "black" }}>Services :</Text>
-
-                            {servicelist.map((item, index) => (
-                                <View key={index} style={styles.serviceItem}>
-                                    <View style={styles.checkboxContainer}>
-                                        {/* Render service name dynamically */}
-                                        <Text style={styles.label}>{item.servicename}</Text>
-
-                                        {/* Checkbox for each service */}
-                                        <CheckBox
-                                            value={servicecheckedlist.includes(item.serviceid)}
-                                            onValueChange={() => handleServiceCheckboxChange(item.serviceid)}
-                                        />
-
-
-                                        {/* Conditional input for rate when checkbox is selected */}
-                                        {servicecheckedlist.includes(item.serviceid) && (
-                                            <TextInput
-                                                style={styles.checkboxinput}
-                                                placeholder='Enter Rate'
-                                                onChangeText={(text) => handleRateChange(index, text)}
+                                            <CheckBox
+                                                value={paragraphscheckedlist.includes(item.sno)}
+                                                onValueChange={() => handleParagraphCheckboxChange(item.sno)}
                                             />
-                                        )}
+                                        </View>
                                     </View>
-                                </View>
-                            ))}
-                        </View>
-                    )}
+                                ))}
+                            </View>
+                        )}
 
-                    {paragraphslist && paragraphslist.length > 0 && (
-                        <View style={styles.service_section}>
-                            <Text style={{ fontSize: 20, color: 'black' }}>Select Paragraphs:</Text>
-                            {paragraphslist.map((item) => (
-                                <View key={item.sno} style={styles.serviceItem}>
-                                    <View style={styles.checkboxContainer}>
-                                        <Text onPress={() => togglePopup(item.sno)} style={styles.label}>
-                                            {item.name}
-                                        </Text>
-                                        <CheckBox
-                                            value={paragraphscheckedlist.includes(item.sno)}
-                                            onValueChange={() => handleParagraphCheckboxChange(item.sno)}
-                                        />
-                                    </View>
-                                </View>
-                            ))}
+                        <View style={{ display: 'flex', flexDirection: 'row', width: "100%", justifyContent: 'space-between' }}>
+                            <TouchableOpacity
+                                style={styles.previousbtn}
+                                onPress={() => { setSection5(false); setSection4(true) }}
+                            >
+                                <Text style={{ margin: 'auto', color: '#fff' }}>Previous</Text>
+                            </TouchableOpacity>
                         </View>
-                    )}
-                    <Button title="Preview" onPress={handleSubmit(onSubmit , onError)} />
+
+                        <TouchableOpacity
+                            style={styles.previewbtn}
+                            onPress={handleSubmit(onSubmit, onError)}
+                        >
+                            <Text style={{ margin: 'auto', color: '#fff' }}>Preview</Text>
+                        </TouchableOpacity>
+                    </View>
+
+
+
+
+
+
+
+
+
+
                     <Modal
                         transparent={true}
                         visible={editVisible}
@@ -922,17 +1061,15 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     header: {
-        height: "3%",
+        height: "6%",
         width: "100%",
-        // backgroundColor: "#8F0E16",
-        display: 'flex',
-        justifyContent: 'center',
         marginBottom: '5%'
     },
     heading: {
         fontSize: 20,
         color: "#8F0E16",
         textAlign: 'center',
+        margin: 'auto'
     },
     inputcontainer: {
         flexDirection: 'column',     // Places label and input in a row
@@ -949,8 +1086,13 @@ const styles = StyleSheet.create({
         height: 40,               // Input height
         borderColor: '#ccc',
         borderWidth: 1,
-        paddingHorizontal: 10,
         borderRadius: 5,
+    },
+
+
+
+    paragraphsection: {
+        display: 'flex'
     },
 
     contentContainer: {
@@ -992,7 +1134,16 @@ const styles = StyleSheet.create({
         backgroundColor: "#dfdede",
         borderRadius: 10,
         padding: 10,
-        marginTop: 10
+        marginTop: 10,
+        marginBottom : 10
+    },
+    paragraph_section: {
+        width: "100%",
+        backgroundColor: "#dfdede",
+        borderRadius: 10,
+        padding: 10,
+        marginTop: 10,
+        marginBottom : 10
     },
     checkboxinput: {
         borderColor: '#ccc',
@@ -1054,42 +1205,63 @@ const styles = StyleSheet.create({
         paddingHorizontal: 8,
         marginBottom: 10,         // Adds some space between inputs
 
-      },
-      dropdownButtonTxtStyle: {
+    },
+    dropdownButtonTxtStyle: {
         flex: 1,
         fontSize: 18,
         fontWeight: '500',
         color: '#151E26',
-      },
-      dropdownButtonArrowStyle: {
+    },
+    dropdownButtonArrowStyle: {
         fontSize: 28,
-      },
-      dropdownButtonIconStyle: {
+    },
+    dropdownButtonIconStyle: {
         fontSize: 28,
         marginRight: 8,
-      },
-      dropdownMenuStyle: {
+    },
+    dropdownMenuStyle: {
         backgroundColor: '#E9ECEF',
         borderRadius: 8,
-      },
-      dropdownItemStyle: {
+    },
+    dropdownItemStyle: {
         width: '100%',
         flexDirection: 'row',
         paddingHorizontal: 12,
         justifyContent: 'center',
         alignItems: 'center',
         paddingVertical: 8,
-      },
-      dropdownItemTxtStyle: {
+    },
+    dropdownItemTxtStyle: {
         flex: 1,
         fontSize: 18,
         fontWeight: '500',
         color: '#151E26',
-      },
-      dropdownItemIconStyle: {
+    },
+    dropdownItemIconStyle: {
         fontSize: 28,
         marginRight: 8,
-      },
+    },
+    previewbtn: {
+        width: '100%',
+        height: 40,
+        backgroundColor: "#8F0E16",
+        marginTop: 10,
+        borderRadius: 10
+    },
+    nextbtn: {
+        width: '30%',
+        height: 40,
+        backgroundColor: "#8F0E16",
+        borderRadius: 10,
+
+    },
+    previousbtn: {
+        width: '30%',
+        height: 40,
+        backgroundColor: "#8F0E16",
+        borderRadius: 10,
+
+    }
 });
 
 

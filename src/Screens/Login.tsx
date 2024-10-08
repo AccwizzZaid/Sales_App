@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     Button,
     Text,
@@ -14,6 +14,12 @@ import { apiurl } from './Contant';
 
 import { setUser } from '../Store/Slices/UserSlice';
 import { useDispatch } from 'react-redux';
+import { requestLocationPermission } from '../functions/location';
+import { getUserLocation } from '../functions/location';
+
+import { setLocation } from '../Store/Slices/LocationSlice';
+import { encryptData , decryptData } from '../functions/dataprotection';
+import { secretKey } from './Contant';
 
 
 
@@ -21,14 +27,19 @@ const Login = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [errors, setErrors] = useState<{ username?: string; password?: string }>({});
-    const navigation : any = useNavigation();
+    const navigation: any = useNavigation();
     const dispatch = useDispatch();
 
     const InitiateLogin = async (data: { username: string; password: string }) => {
 
         try {
-            const response = await axios.post(`${apiurl}login`, data);
-            console.log(response.data);
+            const encrypteddata = encryptData(data , secretKey)
+            console.log(encrypteddata);
+            
+            const response = await axios.post(`${apiurl}login`, {
+                payload : encrypteddata
+            });
+    
 
             if (response.status === 200) {
                 dispatch(setUser("Zaid"));
@@ -36,7 +47,7 @@ const Login = () => {
                 navigation.navigate('Home');
             }
             // Handle successful login
-        } catch (error : any) {
+        } catch (error: any) {
             console.log('Full error:', error.toJSON());
         }
     };
@@ -62,6 +73,25 @@ const Login = () => {
             InitiateLogin({ username, password });
         }
     };
+
+    useEffect(() => {
+        const getlocationPermission = async (): Promise<void> => {
+            const locationpermissionresponse = await requestLocationPermission();
+            console.log(locationpermissionresponse);
+
+            if (locationpermissionresponse) {
+                try {
+                    const data = await getUserLocation(); // Await the promise to get the location
+                    
+                    
+                    dispatch(setLocation(data)); // Dispatch the setLocation action with the coordinates
+                } catch (error) {
+                    console.error("Error getting location:", error);
+                }
+            }
+        }
+        getlocationPermission()
+    }, [])
 
     return (
         <View style={styles.container}>

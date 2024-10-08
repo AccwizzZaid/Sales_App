@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import { useSelector } from 'react-redux'
 import { Text, View, TextInput, Button, StyleSheet, ScrollView, SafeAreaView, KeyboardAvoidingView, Platform, TouchableOpacity, Image, Modal } from 'react-native'
 import { Controller, useForm } from 'react-hook-form'
 import { launchCamera } from 'react-native-image-picker'
@@ -12,6 +13,12 @@ import axios from 'axios'
 import { useNavigation } from '@react-navigation/native'
 import SelectDropdown from 'react-native-select-dropdown'
 import { faL } from '@fortawesome/free-solid-svg-icons'
+import { get } from 'react-native/Libraries/TurboModule/TurboModuleRegistry'
+import { getUserLocation } from '../functions/location'
+
+
+
+
 
 
 
@@ -144,6 +151,10 @@ const Quotation = () => {
     const [section4, setSection4] = useState<boolean>(false);
 
     const [section5, setSection5] = useState<boolean>(false);
+
+    const  locationstate = useSelector((state) => state.location.location);
+    
+    
 
 
 
@@ -307,16 +318,23 @@ const Quotation = () => {
         console.error("Form errors:", errors);
     };
 
+    
+   
+
+
+   
+
 
     const onSubmit = async (data: object): Promise<void> => {
-        console.log("triggerd");
-
+        const location  = await getUserLocation();
         setPreview(true);
+
         const selectedservices = filterCheckedService();
         const selectedparagraphs = filterCheckedParagraphs();
         const payload: object = {
             ...data,
             ...selectedaddress,
+            location,
             ...companyinformation,
             socpic: socpic,  // Include the image URI or Base64 string in the payload
             selectedservices, // Ensure you're spreading/selecting services properly
@@ -352,6 +370,8 @@ const Quotation = () => {
                 <ScrollView contentContainerStyle={styles.contentContainer}>
                     <View style={styles.header}>
                         <Text style={styles.heading}>Create Quotation</Text>
+                
+                
                     </View>
 
                     <View style={{ display: section1 ? 'flex' : 'none' }}>
@@ -365,7 +385,7 @@ const Quotation = () => {
                                     <Text style={styles.labels}>Society Name : </Text>
                                     <TextInput
                                         style={styles.input}
-                                        placeholder="  Society Name"
+                                        placeholder=" Society Name"
                                         onBlur={onBlur}
                                         onChangeText={onChange}
                                         value={value}
@@ -386,7 +406,7 @@ const Quotation = () => {
                                     <Text style={styles.labels}>Registration Number :</Text>
                                     <TextInput
                                         style={styles.input}
-                                        placeholder="  Enter Registration Number"
+                                        placeholder=" Enter Registration Number"
                                         onBlur={onBlur}
                                         onChangeText={onChange}
                                         value={value}
@@ -408,7 +428,7 @@ const Quotation = () => {
                                     <Text style={styles.labels}>Address :</Text>
                                     <TextInput
                                         style={styles.input}
-                                        placeholder="  Enter Address"
+                                        placeholder=" Enter Address"
                                         onBlur={onBlur}
                                         onChangeText={onChange}
                                         value={value}
@@ -495,7 +515,7 @@ const Quotation = () => {
                                     <Text style={styles.labels}>Email :</Text>
                                     <TextInput
                                         style={styles.input}
-                                        placeholder="  Enter Email"
+                                        placeholder=" Enter Email"
                                         onBlur={onBlur}
                                         onChangeText={onChange}
                                         value={value}
@@ -515,7 +535,7 @@ const Quotation = () => {
                                     <Text style={styles.labels}>No of Flats / Row Houses :</Text>
                                     <TextInput
                                         style={styles.input}
-                                        placeholder="  Enter Total Flats / Row Houses"
+                                        placeholder=" Enter Total Flats / Row Houses"
                                         onBlur={onBlur}
                                         keyboardType="numeric"   // Ensures the numeric keyboard pops up
                                         onChangeText={onChange}
@@ -536,7 +556,7 @@ const Quotation = () => {
                                     <Text style={styles.labels}>No of Shops :</Text>
                                     <TextInput
                                         style={styles.input}
-                                        placeholder="  Enter Total Shops"
+                                        placeholder=" Enter Total Shops"
                                         onBlur={onBlur}
                                         keyboardType="numeric"   // Ensures the numeric keyboard pops up
                                         onChangeText={onChange}
@@ -569,7 +589,7 @@ const Quotation = () => {
                                     <Text style={styles.labels}>Insurance Secure Amount :</Text>
                                     <TextInput
                                         style={styles.input}
-                                        placeholder="  Enter Insurance Secure Amount"
+                                        placeholder=" Enter Insurance Secure Amount"
                                         onBlur={onBlur}
                                         keyboardType="numeric"   // Ensures the numeric keyboard pops up
                                         onChangeText={onChange}
@@ -591,7 +611,7 @@ const Quotation = () => {
                                     <Text style={styles.labels}>Secretary Name :</Text>
                                     <TextInput
                                         style={styles.input}
-                                        placeholder="Enter Secretary Name"
+                                        placeholder=" Enter Secretary Name"
                                         onBlur={onBlur}
                                         onChangeText={onChange}
                                         value={value}
@@ -613,7 +633,7 @@ const Quotation = () => {
                                     <Text style={styles.labels}>Secretary No :</Text>
                                     <TextInput
                                         style={styles.input}
-                                        placeholder="Enter Secretary No"
+                                        placeholder=" Enter Secretary No"
                                         onBlur={onBlur}
                                         onChangeText={onChange}
                                         value={String(value)}
@@ -634,7 +654,7 @@ const Quotation = () => {
                                     <Text style={styles.labels}>Chairman Name :</Text>
                                     <TextInput
                                         style={styles.input}
-                                        placeholder="Enter Chairman Name"
+                                        placeholder=" Enter Chairman Name"
                                         onBlur={onBlur}
                                         onChangeText={onChange}
                                         value={value}
@@ -652,7 +672,7 @@ const Quotation = () => {
                                     <Text style={styles.labels}>Chairman No :</Text>
                                     <TextInput
                                         style={styles.input}
-                                        placeholder="Enter Chairman No"
+                                        placeholder=" Enter Chairman No"
                                         onBlur={onBlur}
                                         onChangeText={onChange}
                                         value={String(value)}
@@ -671,7 +691,7 @@ const Quotation = () => {
                                     <Text style={styles.labels}>Treasurer Name :</Text>
                                     <TextInput
                                         style={styles.input}
-                                        placeholder="Enter Treasurer Name"
+                                        placeholder=" Enter Treasurer Name"
                                         onBlur={onBlur}
                                         onChangeText={onChange}
                                         value={value}
@@ -689,7 +709,7 @@ const Quotation = () => {
                                     <Text style={styles.labels}>Treasurer No :</Text>
                                     <TextInput
                                         style={styles.input}
-                                        placeholder="Enter Treasurer No"
+                                        placeholder=" Enter Treasurer No"
                                         onBlur={onBlur}
                                         onChangeText={onChange}
                                         value={String(value)}
@@ -705,7 +725,7 @@ const Quotation = () => {
                                     <Text style={styles.labels}>First Committee Member Name :</Text>
                                     <TextInput
                                         style={styles.input}
-                                        placeholder="Enter First Committee Member Name"
+                                        placeholder=" Enter First Committee Member Name"
                                         onBlur={onBlur}
                                         onChangeText={onChange}
                                         value={value}
@@ -721,7 +741,7 @@ const Quotation = () => {
                                     <Text style={styles.labels}>First Committee Member Name :</Text>
                                     <TextInput
                                         style={styles.input}
-                                        placeholder="Enter First Committee Member Name"
+                                        placeholder=" Enter First Committee Member Name"
                                         onBlur={onBlur}
                                         onChangeText={onChange}
                                         value={value}
@@ -756,7 +776,7 @@ const Quotation = () => {
                                     <Text style={styles.labels}>First Committee Member Name :</Text>
                                     <TextInput
                                         style={styles.input}
-                                        placeholder="Enter First Committee Member Name"
+                                        placeholder=" Enter First Committee Member Name"
                                         onBlur={onBlur}
                                         onChangeText={onChange}
                                         value={value}
@@ -774,7 +794,7 @@ const Quotation = () => {
                                     <Text style={styles.labels}>First Committee Member Contact :</Text>
                                     <TextInput
                                         style={styles.input}
-                                        placeholder="Enter First Committee Member Contact"
+                                        placeholder=" Enter First Committee Member Contact"
                                         onBlur={onBlur}
                                         onChangeText={onChange}
                                         value={String(value)}
@@ -792,7 +812,7 @@ const Quotation = () => {
                                     <Text style={styles.labels}>Second Committee Member Name:</Text>
                                     <TextInput
                                         style={styles.input}
-                                        placeholder="Enter Second Committee Member Name"
+                                        placeholder=" Enter Second Committee Member Name"
                                         onBlur={onBlur}
                                         onChangeText={onChange}
                                         value={value}
@@ -809,7 +829,7 @@ const Quotation = () => {
                                     <Text style={styles.labels}>Second Committee Member Contact:</Text>
                                     <TextInput
                                         style={styles.input}
-                                        placeholder="Enter Second Committee Member Contact"
+                                        placeholder=" Enter Second Committee Member Contact"
                                         onBlur={onBlur}
                                         onChangeText={onChange}
                                         value={String(value)}
@@ -826,7 +846,7 @@ const Quotation = () => {
                                     <Text style={styles.labels}>Security Guard Number :</Text>
                                     <TextInput
                                         style={styles.input}
-                                        placeholder="Enter Security Guard Number"
+                                        placeholder=" Enter Security Guard Number"
                                         onBlur={onBlur}
                                         onChangeText={onChange}
                                         value={String(value)}
@@ -843,7 +863,7 @@ const Quotation = () => {
                                     <Text style={styles.labels}>Security Superintendent Number :</Text>
                                     <TextInput
                                         style={styles.input}
-                                        placeholder="Enter Security Superintendent Number"
+                                        placeholder=" Enter Security Superintendent Number"
                                         onBlur={onBlur}
                                         onChangeText={onChange}
                                         value={String(value)}
@@ -878,7 +898,7 @@ const Quotation = () => {
                             name="nextFollowuptime"
                             render={({ field: { onChange, onBlur, value } }) => (
                                 <View style={styles.inputcontainer}>
-                                    <Text style={styles.labels}>Select Follow Up Date:</Text>
+                                    <Text style={styles.labels}>Select Follow Up Time:</Text>
                                     <Timeinput value={value} onChange={onChange} />
                                 </View>
                             )}
@@ -971,36 +991,47 @@ const Quotation = () => {
                         {paragraphslist && paragraphslist.length > 0 && (
                             <View style={styles.paragraph_section}>
                                 <Text style={{ fontSize: 20, color: 'black' }}>Select Paragraphs:</Text>
-                                {paragraphslist.map((item) => (
-                                    <View key={item.sno} style={styles.serviceItem}>
-                                        <View style={styles.checkboxContainer}>
-                                            <Text onPress={() => togglePopup(item.sno)} style={styles.label}>
-                                                {item.name}
-                                            </Text>
-                                            <CheckBox
-                                                value={paragraphscheckedlist.includes(item.sno)}
-                                                onValueChange={() => handleParagraphCheckboxChange(item.sno)}
-                                            />
+                                <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' }}>
+                                    {paragraphslist.map((item) => (
+                                        <View
+                                            key={item.sno}
+                                            style={{
+                                                width: '48%', // Two items in a row
+                                                marginBottom: 10, // Spacing between rows
+                                            }}
+                                        >
+                                            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                                <Text
+                                                    onPress={() => togglePopup(item.sno)}
+                                                    style={{ fontSize: 16, color: 'black' }}
+                                                >
+                                                    {item.name}
+                                                </Text>
+                                                <CheckBox
+                                                    value={paragraphscheckedlist.includes(item.sno)}
+                                                    onValueChange={() => handleParagraphCheckboxChange(item.sno)}
+                                                />
+                                            </View>
                                         </View>
-                                    </View>
-                                ))}
+                                    ))}
+                                </View>
                             </View>
                         )}
 
-                        <View style={{ display: 'flex', flexDirection: 'row', width: "100%", justifyContent: 'space-between' }}>
+                        <View style={{ display: 'flex', flexDirection: 'row', width: '100%', justifyContent: 'space-between' }}>
                             <TouchableOpacity
-                                style={styles.previousbtn}
+                                style={{ backgroundColor: '#730A11', padding: 10, borderRadius: 5 }}
                                 onPress={() => { setSection5(false); setSection4(true) }}
                             >
-                                <Text style={{ margin: 'auto', color: '#fff' }}>Previous</Text>
+                                <Text style={{ color: '#fff', textAlign: 'center' }}>Previous</Text>
                             </TouchableOpacity>
                         </View>
 
                         <TouchableOpacity
-                            style={styles.previewbtn}
+                            style={{ backgroundColor: '#730A11', padding: 10, borderRadius: 5, marginTop: 10 }}
                             onPress={handleSubmit(onSubmit, onError)}
                         >
-                            <Text style={{ margin: 'auto', color: '#fff' }}>Preview</Text>
+                            <Text style={{ color: '#fff', textAlign: 'center' }}>Preview</Text>
                         </TouchableOpacity>
                     </View>
 
@@ -1135,7 +1166,7 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         padding: 10,
         marginTop: 10,
-        marginBottom : 10
+        marginBottom: 10
     },
     paragraph_section: {
         width: "100%",
@@ -1143,7 +1174,7 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         padding: 10,
         marginTop: 10,
-        marginBottom : 10
+        marginBottom: 10
     },
     checkboxinput: {
         borderColor: '#ccc',

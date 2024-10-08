@@ -2,7 +2,7 @@ import React from 'react';
 import { Image } from 'react-native';
 import Dashboard from './Dashboard';
 import Quotation from './Quotation';
-import Quotation_list from './Quotation_list';
+import Reminder from './Reminder';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { DashboardIcon } from '../../public/icons';
 
@@ -35,8 +35,8 @@ const Home = () => {
         }}
       />
       <Tab.Screen
-        name='Quotationlist'
-        component={Quotation_list}
+        name='Reminder'
+        component={Reminder}
         options={{
           headerShown: false,
           tabBarIcon: ({ color, size }) => (

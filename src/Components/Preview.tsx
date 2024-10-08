@@ -4,6 +4,9 @@ import { WebView } from 'react-native-webview';
 import { useRoute } from '@react-navigation/native';
 import { apiurl } from '../Screens/Contant';
 import axios from 'axios';
+import { useNavigation } from '@react-navigation/native';
+import Toast from 'react-native-toast-message';
+
 
 const screenHeight = Dimensions.get('window').height;
 const screenWidth = Dimensions.get('window').width;
@@ -15,6 +18,8 @@ const Preview = () => {
     const route = useRoute();
     const { payload } = route.params;
     console.log(payload);
+
+    const navigation: any = useNavigation();
 
     let totalflats = parseInt(payload.totalflatsrowhouse);
 
@@ -320,14 +325,54 @@ const Preview = () => {
 </html>
   `;
 
-    const generatepdf = async () => {
-        const response = await axios.post(`${apiurl}generatepdf`, payload);
-
+    type generateresponse = {
+        data: {
+            message: string,
+            path?: string,
+            status: boolean
+        }
 
     }
 
+    const generatepdf = async () => {
+        try {
+          const response: generateresponse = await axios.post(`${apiurl}generatepdf`, payload);
+      
+          console.log(response.data);
+      
+          if (response.data.status === true) {
+            Toast.show({
+              type: 'success',
+              text1: 'Success',
+              text2: response.data.message,
+              visibilityTime : 4000,
+              autoHide: false,
+              position : 'bottom'
+            });
+      
+            setTimeout(() => {
+              navigation.navigate('Dashboard');
+            }, 4000); // 2 seconds delay
+          } else {
+            Toast.show({
+              type: 'error',
+              text1: 'Error',
+              text2: response.data.message
+            });
+          }
+        } catch (error) {
+          Toast.show({
+            type: 'error',
+            text1: 'Network Error',
+            text2: 'Something went wrong. Please try again later.'
+          });
+          console.error(error);
+        }
+      };
+      
     return (
         <View style={styles.container}>
+            <Toast ref={(ref) => Toast.setRef(ref)} />
             <WebView
                 originWhitelist={['*']}
                 source={{ html: htmlContent }}
@@ -361,11 +406,12 @@ const styles = StyleSheet.create({
     },
     webview: {
         width: windowWidth,
-        height: windowHeight,
+        height: windowHeight - 200,
         marginTop: 20,
-        marginBottom: 10,
+        marginBottom: 80,
         borderRadius: 10,
-        borderBlockColor: 'yellow'
+        borderBlockColor: 'yellow',
+       
     },
     button: {
         backgroundColor: '#730A11',
